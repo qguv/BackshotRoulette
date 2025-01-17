@@ -1,5 +1,7 @@
-from backshot import *
 import time
+
+from backshot import BackshotRoulette
+from roulette import BuckshotRouletteMove, Items
 
 bot = BackshotRoulette()
 

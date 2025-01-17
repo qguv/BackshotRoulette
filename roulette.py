@@ -1,4 +1,4 @@
-from enum import *
+from enum import Enum
 from fractions import Fraction
 from copy import deepcopy
 from typing import Literal

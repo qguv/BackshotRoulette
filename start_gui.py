@@ -1,7 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
-from backshot import *
-import time
+
+from backshot import BackshotRoulette
+from roulette import BuckshotRouletteMove, Items
 
 def font(size: int, bold = False):
     font_name = "Arial Black" if bold else "Arial"
