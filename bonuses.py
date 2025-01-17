@@ -37,7 +37,7 @@ def item_bonus(items: list):
 def item_usage_bonus(move: ValidMoves, state: BuckshotRouletteMove):
     match move:
         case ValidMoves.USE_BEER:
-            if state.get_current_shell() == None and state.live_shells < state.blank_shells: return 250
+            if state.get_current_shell() == None and state.unknown_live_shells < state.unknown_blank_shells: return 250
             return 0
         
         case ValidMoves.USE_CIGARETTES:
@@ -47,10 +47,10 @@ def item_usage_bonus(move: ValidMoves, state: BuckshotRouletteMove):
         
         case ValidMoves.USE_HAND_SAW:
             if state.get_current_shell() == "live": return 250
-            if state.live_shells >= state.blank_shells: return 100
+            if state.unknown_live_shells >= state.unknown_blank_shells: return 100
         
         case ValidMoves.USE_HANDCUFFS:
-            if state.live_shells + state.blank_shells == 2: return 250
+            if state.unknown_live_shells + state.unknown_blank_shells == 2: return 250
             return 100
         
         case ValidMoves.USE_MAGNIFYING_GLASS:
@@ -72,7 +72,7 @@ def known_shell_bonus(move: ValidMoves, state: BuckshotRouletteMove):
         elif (not state.is_players_turn) and move != ValidMoves.SHOOT_DEALER: return INF
     
     elif state.get_current_shell() == None:
-        chance_live_loaded = Fraction(state.live_shells, state.live_shells + state.blank_shells)
+        chance_live_loaded = Fraction(state.unknown_live_shells, state.unknown_live_shells + state.unknown_blank_shells)
         
         if state.is_players_turn and move == ValidMoves.SHOOT_DEALER: chance_live_loaded *= 100
         elif (not state.is_players_turn) and move == ValidMoves.SHOOT_PLAYER: chance_live_loaded *= 100
@@ -95,13 +95,13 @@ def low_health_penalty(state: BuckshotRouletteMove):
     return 0
 
 def shoot_other_person_bonus(move: ValidMoves, state: BuckshotRouletteMove):
-    chance_live_loaded = Fraction(state.live_shells, state.live_shells + state.blank_shells)
+    chance_live_loaded = Fraction(state.unknown_live_shells, state.unknown_live_shells + state.unknown_blank_shells)
     
     if state.get_current_shell() != None or chance_live_loaded < 0.5: return 0
     
     if state.is_players_turn and move == ValidMoves.SHOOT_DEALER:
-        return 100 * (state.live_shells - state.blank_shells)
+        return 100 * (state.unknown_live_shells - state.unknown_blank_shells)
     elif (not state.is_players_turn) and move == ValidMoves.SHOOT_PLAYER:
-        return 100 * (state.live_shells - state.blank_shells)
+        return 100 * (state.unknown_live_shells - state.unknown_blank_shells)
     
     return 0

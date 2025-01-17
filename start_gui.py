@@ -74,20 +74,20 @@ class GraphicBackshot: # ha ha ha ha ha
                                         )
         self.player_health.grid(row = 3, column = 1)
         
-        self.live_shells = tk.Spinbox(self.window,
+        self.unknown_live_shells = tk.Spinbox(self.window,
                                       from_ = 0,
                                       to = 4,
                                       font = font(16),
                                       state = "readonly"
                                       )
-        self.live_shells.grid(row = 5, column = 1)
-        self.blank_shells = tk.Spinbox(self.window,
+        self.unknown_live_shells.grid(row = 5, column = 1)
+        self.unknown_blank_shells = tk.Spinbox(self.window,
                                        from_ = 0,
                                        to = 4,
                                        font = font(16),
                                        state = "readonly"
                                        )
-        self.blank_shells.grid(row = 6, column = 1)
+        self.unknown_blank_shells.grid(row = 6, column = 1)
         
         self.dealer_items = tk.Entry(self.window,
                                      font = font(16)
@@ -204,8 +204,8 @@ class GraphicBackshot: # ha ha ha ha ha
         max_health = get_int_value(self.maximum_health)
         dealer_health = max(max_health, get_int_value(self.dealer_health))
         player_health = max(max_health, get_int_value(self.player_health))
-        lives = get_int_value(self.live_shells)
-        blanks = get_int_value(self.blank_shells)
+        lives = get_int_value(self.unknown_live_shells)
+        blanks = get_int_value(self.unknown_blank_shells)
         dealer_items = string_to_item(self.dealer_items.get())[:8]
         player_items = string_to_item(self.player_items.get())[:8]
         
