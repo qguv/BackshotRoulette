@@ -1,0 +1,207 @@
+# from https://www.youtube.com/watch?v=8u8H-3WcP3o
+phase I, 2 charges
+
+round I.1
+dealer loads 1 live, 2 blank
+player shoots self, blank
+player shoots dealer, live
+!check dealer charges = 1
+dealer shoots self, blank
+
+round I.2
+dealer loads 3 live, 2 blank
+player shoots dealer, live
+!check dealer charges = 0
+player wins phase I
+
+phase II, 4 charges
+
+round II.1
+player gets glass, glass; dealer gets glass, beer
+dealer loads 1 live, 1 blank
+player shoots self, live
+!check dealer charges = 3
+dealer shoots self, blank
+
+round II.2
+player gets knife, cigs
+dealer gets cuffs, cigs
+dealer loads 2 live, 2 blank
+player uses cigs
+!check player charges = 4
+player uses glass, sees blank
+player shoots self, blank
+player uses glass, sees live
+player uses knife
+player shoots dealer, live
+!check dealer charges = 2
+dealer drinks beer, ejects live
+dealer smokes
+!check dealer charges = 3
+dealer shoots self, blank
+
+round II.3
+player gets beer, cigs; dealer gets glass, cigs
+dealer loads 3 live, 2 blanks
+player shoots self, live
+!check player charges 3
+dealer uses glass
+dealer uses cuffs
+dealer smokes
+!check dealer charges = 4
+dealer shoots self, blank
+dealer uses glass
+dealer shoots player, live
+!check player charges = 2
+# player loses a turn to cuffs
+dealer shoots player, blank
+# cuffs removed
+player uses cigs
+!check player charges = 3
+player shoots dealer, live
+!check dealer charges = 3
+
+round II.4
+!check player items = beer
+!check dealer items empty
+player gets cigs, glass; dealer gets cigs, knife
+dealer loads 3 live, 3 blank
+player shoots self, blank
+player shoots dealer, live
+!check dealer charges = 2
+dealer uses cigs
+!check dealer charges = 3
+dealer shoots self, live
+!check dealer charges = 2
+player shoots dealer, live
+!check dealer charges = 1
+dealer shoots self, blank
+dealer shoots self, blank
+
+round II.5
+!check dealer charges = 1
+!check player charges = 3
+!check player items = cigs, glass, beer
+!check dealer items = knife
+player gets cigs, beer; dealer gets cigs, cuffs
+dealer loads 5 live, 2 blank
+player uses glass, sees blank
+player shoots self, blank
+player uses beer, ejects live
+player shoots dealer, live
+player wins phase II
+
+phase III, 4+2 charges
+# scissors appear
+
+round III.1
+player gets knife, cuffs, cigs, knife; dealer gets cigs, knife, glass, cigs
+dealer loads 1 live, 2 blank
+player shoots self, blank
+player uses cuffs
+player uses knife
+player shoots dealer, blank
+# dealer loses a turn to cuffs
+player uses knife
+player shoots dealer, live
+!check dealer charges = 2+2
+# dealer breaks cuffs
+
+round III.2
+!check dealer charges = 2+2
+!check player charges = 2+2
+!check dealer items = cigs, knife, glass, cigs
+!check player items = cigs
+player gets beer, cigs, beer, glass; dealer gets knife, knife, beer, cuffs
+dealer loads 4 live, 4 blank
+player shoots self, blank
+player uses beer, ejects blank
+player shoots dealer, blank
+dealer uses glass
+dealer smokes
+!check dealer charges 3+2
+dealer smokes
+!check dealer charges 4+2
+dealer uses knife
+dealer uses cuffs
+dealer shoots player, live
+!check player charges 2+2
+# player loses turn to cuffs
+dealer uses beer, ejects live
+dealer shoots self, blank
+dealer shoots self, live
+!check dealer charges = 3+2
+# player breaks cuffs
+player uses cigs
+!check player charges = 3+2
+player uses cigs
+!check player charges = 4+2
+player uses beer, eject live
+
+round III.3
+!check player items = glass
+!check player charges = 4+2
+!check dealer items = knife, knife
+!check dealer charges = 3+2
+player gets cuffs, knife, beer, beer; dealer gets cigs, cigs, knife
+dealer loads 3 live, 2 blank
+player shoots self, live
+!check player charges = 3+2
+dealer uses cigs
+!check dealer charges = 4+2
+dealer uses glass
+dealer shoots self, blank
+dealer shoots self, live
+!check dealer charges = 3+2
+player uses cuffs
+player uses glass, sees blank
+player shoots self, blank
+player uses knife
+player shoots dealer, live
+!check dealer charges = 1+2
+# dealer breaks cuffs
+
+round III.4
+!check player items = beer, beer
+!check dealer items = knife, knife, knife, cigs
+player gets beer, knife, cigs, knife
+dealer gets cuffs, knife, cigs, glass
+dealer loads 4 live, 2 blank
+!check dealer charges 1+2
+!check player charges 3+2
+player uses beer, ejects live
+player uses beer, ejects live
+player uses beer, ejects live
+player shoots self, blank
+player uses knife
+player shoots dealer, live
+!check dealer charges = 0+1
+# guillotine dealer
+dealer uses cigs
+!check dealer charges = 0+1
+dealer uses cigs
+!check dealer charges = 0+1
+dealer shoots self, blank
+
+round III.5
+!check dealer charges = 0+1
+!check player charges = 3+2
+!check dealer items = cuffs, knife, knife, knife, knife, glass
+!check player items = knife, cigs
+player gets cigs, beer, glass, beer; dealer gets glass, cuffs
+# note: unclear what happens when items are full; do you choose?
+dealer loads 5 live, 3 blank
+player uses cigs
+!check player charges = 4+2
+player uses glass, sees live
+player shoots dealer, live
+player wins round III
+
+player wins game
+
+# shots fired 19
+# shots ejected 41
+# doors kicked 2
+# cigs smoked 5
+# mL beer drank 1980
+# cash 65930
