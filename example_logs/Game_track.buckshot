@@ -144,15 +144,15 @@ player uses cigs
 !check player charges = 5
 player uses cigs
 !check player charges = 6
-player uses beer, eject live
+player uses beer, ejects live
 
 # https://youtu.be/8u8H-3WcP3o?t=728
 round III.3
-!check player items = glass
+!check dealer charges = 5
 !check player charges = 6
 !check dealer items = knife, knife
-!check dealer charges = 5
-player gets cuffs, knife, beer, beer; dealer gets cigs, cigs, knife
+!check player items = glass
+player gets cuffs, knife, beer, beer; dealer gets cigs, cigs, knife, glass
 dealer loads 3 live, 2 blank
 player shoots self, live
 !check player charges = 5
