@@ -193,7 +193,7 @@ def check_query_line(state: GameState, words) -> None:
                 raise InvalidLine(f"expected a round in phase {"I" * (state.num_completed_phases)}")
             winner_name = state.winner_names_by_phase[phase_num]
             if player_name != winner_name:
-                raise CheckFailed(f"b-b-b-but {winner_name} won!!!!!11")
+                raise CheckFailed(f"actually, {winner_name} won")
 
         case _:
             raise NoMatch("expecting query line")
@@ -212,6 +212,33 @@ def parse_game_line(old_state: GameState, words) -> GameState:
 
             new_state.shoot(target_name, is_live)
 
+        case [player_name, "uses", item_name, *item_args]:
+            item = items_by_name[item_name]
+            try:
+                new_state.phase.players[player_name].items.remove(item)
+            except KeyError:
+                raise GameError(f"{player_name} doesn't have {item_name}")
+
+            match [item, *item_args]:
+                case [Items.CIGARETTES]:
+                    new_state.phase.players[player_name].charges = min(
+                        new_state.phase.max_charges,
+                        new_state.phase.players[player_name].charges + 1,
+                    )
+                case [Items.HAND_SAW]:
+                    new_state.phase.round.gun_is_sawed = True
+                case [Items.HANDCUFFS]:
+                    new_state.phase.round.handcuffed_player_names.add("dealer" if player_name == "player" else "player")
+                case [Items.MAGNIFYING_GLASS, ",", "sees", _shell_type]:
+                    # TODO: something epistemic with _shell_type
+                    pass
+                case [Items.BEER, ",", "sees", _shell_type]:
+                    is_live = _shell_type == "live"
+                    new_state.eject_shell(is_live)
+                    # TODO: something epistemic with _shell_type
+                case _:
+                    raise NoMatch("expecting game line")
+
         case _:
             raise NoMatch("expecting game line")
 
@@ -223,11 +250,14 @@ def parse_logfile(f):
     for i, line in enumerate(f):
         try:
             game_state = parse_line(game_state, line)
-        except LogParseError as e:
+        except Exception as e:
             print("line", i+1)
             print(line.strip())
-            print(e)
-            return
+            if isinstance(e, LogParseError):
+                print(e)
+                return
+            else:
+                raise e
 
 
 def parse_args():

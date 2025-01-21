@@ -80,12 +80,8 @@ class GameState:
 
                 return
 
-        self.phase.round.past_shells.append(is_live)
-
-        # if no shells left, end round
-        if len(self.phase.round.past_shells) == self.phase.round.total_shells():
-            self.phase.round = None
-            self.phase.num_completed_rounds += 1
+        self.eject_shell(is_live)
+        if not self.phase.round:
             return
 
         # advance turn
@@ -95,3 +91,10 @@ class GameState:
             if next_player not in self.phase.round.handcuffed_player_names:
                 self.phase.round.is_players_turn = not self.phase.round.is_players_turn
 
+    def eject_shell(self, is_live):
+        self.phase.round.past_shells.append(is_live)
+
+        # if no shells left, end round
+        if len(self.phase.round.past_shells) == self.phase.round.total_shells():
+            self.phase.round = None
+            self.phase.num_completed_rounds += 1
