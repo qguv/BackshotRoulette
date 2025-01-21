@@ -68,7 +68,7 @@ player shoots dealer, live
 # https://youtu.be/8u8H-3WcP3o?t=344
 round II.4
 !check player items = beer
-!check dealer items empty
+!check dealer items =
 player gets cigs, glass; dealer gets cigs, knife
 dealer loads 3 live, 3 blank
 player shoots self, blank
