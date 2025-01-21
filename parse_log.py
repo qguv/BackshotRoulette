@@ -181,6 +181,8 @@ def parse_game_line(old_state: GameState, words) -> GameState:
                 target_name = player_name
             is_live = (_shell_type == "live")
 
+            new_state.shoot(target_name, is_live)
+
         case _:
             raise NoMatch("expecting game line")
 

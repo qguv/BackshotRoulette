@@ -1,0 +1,97 @@
+from collections import OrderedDict
+from dataclasses import dataclass, field
+from typing import List, Optional, Set
+
+from roulette import Items
+
+# true is live, false is blank
+type ShellType = bool
+
+@dataclass
+class RoundState:
+    total_live_shells: int
+    total_blank_shells: int
+    past_shells: List[ShellType] = field(default_factory=list)
+    is_players_turn: bool = True
+    gun_is_sawed: bool = False
+    handcuffed_player_names: Set[str] = field(default_factory=set)
+
+    def remaining_live_shells(self) -> int:
+        return self.total_live_shells - sum(1 for is_live in self.past_shells if is_live)
+
+    def remaining_blank_shells(self) -> int:
+        return self.total_blank_shells - sum(1 for is_live in self.past_shells if not is_live)
+
+    def total_shells(self) -> int:
+        return self.total_live_shells + self.total_blank_shells
+
+    def finish_turn(self):
+        self.is_players_turn = not self.is_players_turn
+
+    def eject_shell(self):
+        pass
+
+@dataclass
+class Player:
+    charges: int
+    items: Set[Items] = field(default_factory=list)
+
+@dataclass
+class PhaseState:
+    max_charges: int
+    players: OrderedDict[str, Player]
+    num_completed_rounds: int = 0
+    round: Optional[RoundState] = None
+
+@dataclass
+class GameState:
+    player_names: List[str]
+    is_double_or_nothing_mode: bool = False
+    phase: Optional[PhaseState] = None
+    total_phases: int = 3
+    num_completed_phases: int = 0
+    winner: Optional[str] = None
+
+    def shoot(self, target_name, is_live):
+        non_target_name = "dealer" if target_name == "player" else "player"
+        if is_live:
+
+            # handle sawed gun
+            damage = 2 if self.phase.round.gun_is_sawed else 1
+            self.phase.round.gun_is_sawed = False
+
+            self.phase.players[target_name].charges -= damage
+
+            # if the target died
+            if self.phase.players[target_name].charges <= 0:
+
+                # the non-target wins the game if:
+                if (
+                    # the human player dies in double-or-nothing mode
+                    (target_name == "player" and self.is_double_or_nothing_mode)
+
+                    # or the target dies in the last phase
+                    or (self.num_completed_phases == self.total_phases - 1)
+                ):
+                    self.winner = non_target_name
+
+                # end the phase
+                self.phase = None
+                self.num_completed_phases += 1
+                return
+
+        self.phase.round.past_shells.append(is_live)
+
+        # if no shells left, end round
+        if len(self.phase.round.past_shells) == self.phase.round.total_shells():
+            self.phase.round = None
+            self.phase.num_completed_rounds += 1
+            return
+
+        # advance turn
+        shooter_name = "player" if self.phase.round.is_players_turn else "dealer"
+        if shooter_name != target_name or is_live:
+            next_player = "dealer" if self.phase.round.is_players_turn else "player"
+            if next_player not in self.phase.round.handcuffed_player_names:
+                self.phase.round.is_players_turn = not self.phase.round.is_players_turn
+
