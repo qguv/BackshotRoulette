@@ -38,34 +38,43 @@ class RoundState:
 class Player:
     charges: int
     items: List[Items] = field(default_factory=list)
+    is_critical: bool = False
 
 @dataclass
 class PhaseState:
-    max_charges: int
     players: OrderedDict[str, Player]
-    num_completed_rounds: int = 0
+    max_charges: int
+    critical_charges: int = 0
     round: Optional[RoundState] = None
+    num_completed_rounds: int = 0
 
 @dataclass
 class GameState:
     player_names: List[str]
     is_double_or_nothing_mode: bool = False
-    phase: Optional[PhaseState] = None
     total_phases: int = 3
+    phase: Optional[PhaseState] = None
     num_completed_phases: int = 0
-    winner: Optional[str] = None
     winner_names_by_phase: List[str] = field(default_factory=list) # just for sanity checking logs
+    winner: Optional[str] = None
     max_items: int = 8
 
     def shoot(self, target_name, is_live):
         non_target_name = "dealer" if target_name == "player" else "player"
         if is_live:
 
-            # handle sawed gun
-            damage = 2 if self.phase.round.gun_is_sawed else 1
-            self.phase.round.gun_is_sawed = False
+            if self.phase.players[target_name].is_critical:
+                self.phase.players[target_name].charges = 0
 
-            self.phase.players[target_name].charges -= damage
+            else:
+                # handle sawed gun
+                damage = 2 if self.phase.round.gun_is_sawed else 1
+                self.phase.round.gun_is_sawed = False
+
+                self.phase.players[target_name].charges -= damage
+
+                if self.phase.players[target_name].charges <= self.phase.critical_charges:
+                    self.phase.players[target_name].is_critical = True
 
             # if the target died
             if self.phase.players[target_name].charges <= 0:

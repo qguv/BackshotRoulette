@@ -101,7 +101,7 @@ def parse_phase_setup_line(old_state: GameState, words) -> GameState:
     new_state = deepcopy(old_state)
     match words:
 
-        case ["phase", _phase_num, ",", _max_charges, "charges"]:
+        case ["phase", _phase_num, ",", _max_charges, "charges", *more]:
             # phase in log: one-indexed tally numerals
             # phase_num here: zero-indexed int
             phase_num = len(_phase_num) - 1
@@ -109,14 +109,24 @@ def parse_phase_setup_line(old_state: GameState, words) -> GameState:
                 raise SetupError(f"expected phase {"I" * (new_state.num_completed_phases + 1)}")
 
             max_charges = int(_max_charges)
-
-            new_state.phase = PhaseState(
-                max_charges=max_charges,
-                players=OrderedDict(
-                    (player_name, Player(charges=max_charges))
-                    for player_name in new_state.player_names
-                )
+            players = OrderedDict(
+                (player_name, Player(charges=max_charges))
+                for player_name in new_state.player_names
             )
+
+            match more:
+                case []:
+                    new_state.phase = PhaseState(
+                        players=players,
+                        max_charges=max_charges,
+                    )
+                case [",", "critical", "at", _critical_charges]:
+                    critical_charges = int(_critical_charges)
+                    new_state.phase = PhaseState(
+                        players=players,
+                        max_charges=max_charges,
+                        critical_charges=critical_charges,
+                    )
 
         case _:
             raise NoMatch("expecting phase setup line")
@@ -236,10 +246,11 @@ def parse_game_line(old_state: GameState, words) -> GameState:
             match words:
 
                 case [player_name, "uses", "cigs"]:
-                    new_state.phase.players[player_name].charges = min(
-                        new_state.phase.max_charges,
-                        new_state.phase.players[player_name].charges + 1,
-                    )
+                    if not new_state.phase.players[player_name].is_critical:
+                        new_state.phase.players[player_name].charges = min(
+                            new_state.phase.max_charges,
+                            new_state.phase.players[player_name].charges + 1,
+                        )
 
                 case [player_name, "uses", "knife"]:
                     new_state.phase.round.gun_is_sawed = True
