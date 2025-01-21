@@ -101,12 +101,15 @@ def parse_phase_setup_line(old_state: GameState, words) -> GameState:
     new_state = deepcopy(old_state)
     match words:
 
-        case ["phase", _phase_num, ",", _max_charges, "charges", *more]:
+        case ["phase", phase_name, ",", _max_charges, "charges", *more]:
             # phase in log: one-indexed tally numerals
             # phase_num here: zero-indexed int
-            phase_num = len(_phase_num) - 1
+            expected_phase_name = "I" * (new_state.num_completed_phases + 1)
+            expected_phase_num = new_state.num_completed_phases
+
+            phase_num = len(phase_name) - 1
             if new_state.num_completed_phases != phase_num:
-                raise SetupError(f"expected phase {"I" * (new_state.num_completed_phases + 1)}")
+                raise SetupError(f"expected phase {expected_phase_name}")
 
             max_charges = int(_max_charges)
             players = OrderedDict(
@@ -127,9 +130,11 @@ def parse_phase_setup_line(old_state: GameState, words) -> GameState:
                         max_charges=max_charges,
                         critical_charges=critical_charges,
                     )
+                case _:
+                    raise NoMatch(f"expecting: phase {expected_phase_num}, {{{{int}}}} charges, critical at {{{{int}}}}")
 
         case _:
-            raise NoMatch("expecting phase setup line")
+            raise NoMatch(f"expecting: phase {expected_phase_num}, {{{{int}}}} charges")
     return new_state
 
 def parse_round_setup_line(old_state: GameState, words) -> GameState:
@@ -172,30 +177,30 @@ def parse_round_setup_line(old_state: GameState, words) -> GameState:
 def check_query_line(state: GameState, words) -> None:
     match words:
 
-        case ["!check", player_name, "charges", "=", _expected_value]:
+        case ["!check", expected_winner_name, "charges", "=", _expected_value]:
             expected_value = int(_expected_value)
             if state.phase is None:
                 if expected_value != 0:
-                    raise CheckFailed(f"actually, {player_name} has 0 charges because no phase is in progress (yet/anymore)")
+                    raise CheckFailed(f"actually, {expected_winner_name} has 0 charges because no phase is in progress (yet/anymore)")
                 return
-            if player_name not in state.phase.players:
-                raise InvalidLine(f"no such player {player_name}")
-            player_charges = state.phase.players[player_name].charges
+            if expected_winner_name not in state.phase.players:
+                raise InvalidLine(f"no such player {expected_winner_name}")
+            player_charges = state.phase.players[expected_winner_name].charges
             if player_charges != int(expected_value):
-                raise CheckFailed(f"actually, {player_name} has {player_charges} charges")
+                raise CheckFailed(f"actually, {expected_winner_name} has {player_charges} charges")
 
-        case ["!check", player_name, "items", "=", *_separated_expected_item_names]:
+        case ["!check", expected_winner_name, "items", "=", *_separated_expected_item_names]:
 
             # skip separators (odd-numbered elements)
             _expected_item_names = _separated_expected_item_names[::2]
             expected_items = sorted(items_by_name[name.strip()] for name in _expected_item_names)
 
             if state.phase is None and len(expected_items) != 0:
-                raise CheckFailed(f"actually, {player_name} has no items because no phase is in progress (yet/anymore)")
+                raise CheckFailed(f"actually, {expected_winner_name} has no items because no phase is in progress (yet/anymore)")
 
-            items = sorted(state.phase.players[player_name].items)
+            items = sorted(state.phase.players[expected_winner_name].items)
             if items != expected_items:
-                raise CheckFailed(f"actually, {player_name} has {items}")
+                raise CheckFailed(f"actually, {expected_winner_name} has {items}")
 
         case ["!check", "shells", "=", _expected_num_live, "live", ",", _expected_num_blank, "blank"]:
             expected_num_live = int(_expected_num_live)
@@ -209,13 +214,22 @@ def check_query_line(state: GameState, words) -> None:
             if num_live != expected_num_live or num_blank != expected_num_blank:
                 raise CheckFailed(f"actually, there are {num_live} live, {num_blank} blank shells left")
 
-        case [player_name, "wins", "phase", _expected_phase_num]:
-            expected_phase_num = len(_expected_phase_num) - 1
-            if expected_phase_num != state.num_completed_phases - 1:
-                raise InvalidLine(f"expected a round in phase {"I" * (state.num_completed_phases)}")
-            winner_name = state.winner_names_by_phase[expected_phase_num]
-            if player_name != winner_name:
-                raise CheckFailed(f"actually, {winner_name} won")
+        case [expected_winner_name, "wins", *more]:
+            match more:
+                case ["phase", expected_phase_name]:
+                    expected_phase_num = len(expected_phase_name) - 1
+                    if expected_phase_num != state.num_completed_phases - 1:
+                        raise InvalidLine(f"expected a round in phase {"I" * (state.num_completed_phases)}")
+                    winner_name = state.winner_names_by_phase[expected_phase_num]
+                    if expected_winner_name != winner_name:
+                        raise CheckFailed(f"actually, {winner_name} won phase {expected_phase_name}")
+
+                case ["game"]:
+                    if state.winner != expected_winner_name:
+                        raise CheckFailed(f"actually, {state.winner} won the game")
+
+                case _:
+                    raise NoMatch("expecting query line")
 
         case _:
             raise NoMatch("expecting query line")
@@ -298,6 +312,7 @@ def parse_logfile(f):
                 return
             else:
                 raise e
+    return game_state
 
 
 def parse_args():
