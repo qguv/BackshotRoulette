@@ -95,7 +95,9 @@ class GameState:
         shooter_name = "player" if self.phase.round.is_players_turn else "dealer"
         if shooter_name != target_name or is_live:
             next_player = "dealer" if self.phase.round.is_players_turn else "player"
-            if next_player not in self.phase.round.handcuffed_player_names:
+            try:
+                self.phase.round.handcuffed_player_names.remove(next_player)
+            except KeyError:
                 self.phase.round.is_players_turn = not self.phase.round.is_players_turn
 
     def eject_shell(self, is_live):
