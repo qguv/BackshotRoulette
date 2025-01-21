@@ -1,11 +1,11 @@
-from enum import Enum
+from enum import IntEnum
 from fractions import Fraction
 from copy import deepcopy
 from typing import Literal
 
 INF = 1000000
 
-class ValidMoves(Enum):
+class ValidMoves(IntEnum):
     SHOOT_DEALER = 0
     SHOOT_PLAYER = 1
     USE_HANDCUFFS = 2
@@ -18,7 +18,7 @@ class ValidMoves(Enum):
     USE_EXPIRED_MEDICINE = 9
     USE_BURNER_PHONE = 10
 
-class Items(Enum):
+class Items(IntEnum):
     HANDCUFFS = 0
     HAND_SAW = 1
     CIGARETTES = 2
