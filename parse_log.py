@@ -51,17 +51,17 @@ class TurnError(GameError):
 
 
 def parse_line(state: GameState, line):
+    line = line.strip()
+
+    # ignore comments
+    if line.startswith("#"):
+        return state
+
     # separate lines conjoined by a semicolon
     conjoined_lines = line.split(";")
     if len(conjoined_lines) > 1:
         for conjoined_line in conjoined_lines:
             state = parse_line(state, conjoined_line)
-        return state
-
-    line = line.strip()
-
-    # ignore comments
-    if line.startswith("#"):
         return state
 
     if not line:
