@@ -166,7 +166,7 @@ def check_query_line(state: GameState, words) -> None:
             expected_value = int(_expected_value)
             if state.phase is None:
                 if expected_value != 0:
-                    raise CheckFailed(f"actually, {player_name} has 0 charges because the phase hasn't begun")
+                    raise CheckFailed(f"actually, {player_name} has 0 charges because no phase is in progress (yet/anymore)")
                 return
             if player_name not in state.phase.players:
                 raise InvalidLine(f"no such player {player_name}")
@@ -181,7 +181,7 @@ def check_query_line(state: GameState, words) -> None:
             expected_items = sorted(items_by_name[name.strip()] for name in _expected_item_names)
 
             if state.phase is None and len(expected_items) != 0:
-                raise CheckFailed(f"actually, {player_name} has no items because the phase hasn't begun")
+                raise CheckFailed(f"actually, {player_name} has no items because no phase is in progress (yet/anymore)")
 
             items = sorted(state.phase.players[player_name].items)
             if items != expected_items:
@@ -192,7 +192,7 @@ def check_query_line(state: GameState, words) -> None:
             expected_num_blank = int(_expected_num_blank)
             if state.phase is None or state.phase.round is None:
                 if expected_num_live != 0 or expected_num_blank != 0:
-                    raise CheckFailed("actually, there are no shells because the round hasn't begun")
+                    raise CheckFailed("actually, there are no shells because no round is in progress (yet/anymore)")
                 return
             num_live = state.phase.round.remaining_live_shells()
             num_blank = state.phase.round.remaining_blank_shells()
