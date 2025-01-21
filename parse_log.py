@@ -56,7 +56,7 @@ def parse_line(old_state: GameState, line):
     if len(conjoined_lines) > 1:
         new_state = old_state
         for conjoined_line in conjoined_lines:
-            new_state = parse_line(old_state, conjoined_line)
+            new_state = parse_line(new_state, conjoined_line)
         return new_state
 
     line = line.strip()
@@ -93,7 +93,6 @@ def parse_line(old_state: GameState, line):
         return parse_round_setup_line(old_state, words)
 
     if (words[0] == "dealer") == old_state.phase.round.is_players_turn:
-        print("the line just read is:", words)
         raise TurnError()
 
     return parse_game_line(old_state, words)
@@ -176,19 +175,18 @@ def check_query_line(state: GameState, words) -> None:
             if player_charges != int(value):
                 raise CheckFailed(f"{player_charges} != {value}")
 
-        case ["!check", player_name, "items", "=", *separated_item_names]:
+        case ["!check", player_name, "items", "=", *_separated_expected_item_names]:
 
             # skip separators (odd-numbered elements)
-            item_names = separated_item_names[::2]
+            _expected_item_names = _separated_expected_item_names[::2]
+            expected_items = sorted(items_by_name[name.strip()] for name in _expected_item_names)
 
-            items = [items_by_name[item_name.strip()] for item_name in item_names]
+            if state.phase is None and len(expected_items) != 0:
+                raise CheckFailed(f"no items (because phase hasn't begun) != {expected_items}")
 
-            if state.phase is None and len(separated_item_names) != 0:
-                raise CheckFailed(f"no items (because phase hasn't begun) != {sorted(item_names)}")
-
-            player_items = state.phase.players[player_name].items
-            if player_items != items:
-                raise CheckFailed(f"{player_items} != {sorted(item_names)}")
+            items = sorted(state.phase.players[player_name].items)
+            if items != expected_items:
+                raise CheckFailed(f"{items} != {expected_items}")
 
         case [player_name, "wins", "phase", _phase_num]:
             phase_num = len(_phase_num) - 1
@@ -217,34 +215,45 @@ def parse_game_line(old_state: GameState, words) -> GameState:
 
             new_state.shoot(target_name, is_live)
 
-        case [player_name, "uses", item_name, *item_args]:
+        case [player_name, "uses", item_name, *_]:
             item = items_by_name[item_name]
             try:
                 new_state.phase.players[player_name].items.remove(item)
             except ValueError:
                 raise GameError(f"{player_name} doesn't have {item_name}")
 
-            match [item, *item_args]:
-                case [Items.CIGARETTES]:
+            match words:
+
+                case [player_name, "uses", "cigs"]:
                     new_state.phase.players[player_name].charges = min(
                         new_state.phase.max_charges,
                         new_state.phase.players[player_name].charges + 1,
                     )
-                case [Items.HAND_SAW]:
+
+                case [player_name, "uses", "knife"]:
                     new_state.phase.round.gun_is_sawed = True
-                case [Items.HANDCUFFS]:
-                    new_state.phase.round.handcuffed_player_names.add("dealer" if player_name == "player" else "player")
-                case [Items.MAGNIFYING_GLASS, ",", "sees", _shell_type]:
+
+                case [player_name, "uses", "cuffs"]:
+                    other_player = "dealer" if player_name == "player" else "player"
+                    new_state.phase.round.handcuffed_player_names.add(other_player)
+
+                case ["dealer", "uses", "glass"]:
+                    # TODO: something epistemic
+                    pass
+
+                case ["player", "uses", "glass", ",", "sees", _shell_type]:
                     is_live = _shell_type == "live"
                     if not new_state.phase.round.has_shell(is_live):
                         raise GameError(f"no {_shell_type} shells left to shoot")
                     # TODO: something epistemic with _shell_type
-                case [Items.BEER, ",", "ejects", _shell_type]:
+
+                case [player_name, "uses", "beer", ",", "ejects", _shell_type]:
                     is_live = _shell_type == "live"
                     if not new_state.phase.round.has_shell(is_live):
                         raise GameError(f"no {_shell_type} shells left to shoot")
                     new_state.eject_shell(is_live)
                     # TODO: something epistemic with _shell_type
+
                 case _:
                     raise NoMatch("expecting game line")
 
