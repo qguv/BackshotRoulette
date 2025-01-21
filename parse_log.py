@@ -73,7 +73,7 @@ def parse_line(state: GameState, line):
 
     # TODO: handle repeated games in double-or-nothing mode
     if state.winner is not None:
-        return SetupError("game over")
+        raise SetupError("game over")
 
     words = line.split()
 
@@ -106,7 +106,7 @@ def parse_phase_setup_line(old_state: GameState, words) -> GameState:
             # phase_num here: zero-indexed int
             phase_num = len(_phase_num) - 1
             if new_state.num_completed_phases != phase_num:
-                return SetupError(f"expected phase {"I" * (new_state.num_completed_phases + 1)}")
+                raise SetupError(f"expected phase {"I" * (new_state.num_completed_phases + 1)}")
 
             max_charges = int(_max_charges)
 
@@ -131,10 +131,10 @@ def parse_round_setup_line(old_state: GameState, words) -> GameState:
         case ["round", _phase_num, ".", _round_num]:
             phase_num = len(_phase_num) - 1
             if phase_num != new_state.num_completed_phases:
-                return SetupError(f"expected a round in phase {"I" * (new_state.num_completed_phases + 1)}")
+                raise SetupError(f"expected a round in phase {"I" * (new_state.num_completed_phases + 1)}")
             round_num = int(_round_num) - 1
             if round_num != new_state.phase.num_completed_rounds:
-                return SetupError(f"expected round {new_state.phase.num_completed_rounds + 1}")
+                raise SetupError(f"expected round {new_state.phase.num_completed_rounds + 1}")
 
         case [player_name, "gets", *separated_item_names]:
 
