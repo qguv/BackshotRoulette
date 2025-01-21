@@ -50,52 +50,51 @@ class TurnError(GameError):
         return "not your turn"
 
 
-def parse_line(old_state: GameState, line):
+def parse_line(state: GameState, line):
     # separate lines conjoined by a semicolon
     conjoined_lines = line.split(";")
     if len(conjoined_lines) > 1:
-        new_state = old_state
         for conjoined_line in conjoined_lines:
-            new_state = parse_line(new_state, conjoined_line)
-        return new_state
+            state = parse_line(state, conjoined_line)
+        return state
 
     line = line.strip()
 
     # ignore comments
     if line.startswith("#"):
-        return old_state
+        return state
 
     if not line:
-        return old_state
+        return state
 
     # treat commas, dots, and equals signs as separate words
     for c in ',.=':
         line = line.replace(c, f" {c} ")
 
     # TODO: handle repeated games in double-or-nothing mode
-    if old_state.winner is not None:
+    if state.winner is not None:
         return SetupError("game over")
 
     words = line.split()
 
     try:
-        check_query_line(old_state, words)
-        return old_state
+        check_query_line(state, words)
+        return state
     except NoMatch:
         pass
 
-    if old_state.phase is None:
+    if state.phase is None:
         # TODO: maybe give context that we can only accept phase setup commands?
-        return parse_phase_setup_line(old_state, words)
+        return parse_phase_setup_line(state, words)
 
-    if old_state.phase.round is None:
+    if state.phase.round is None:
         # TODO: maybe give context that we can only accept round setup commands?
-        return parse_round_setup_line(old_state, words)
+        return parse_round_setup_line(state, words)
 
-    if (words[0] == "dealer") == old_state.phase.round.is_players_turn:
+    if (words[0] == "dealer") == state.phase.round.is_players_turn:
         raise TurnError()
 
-    return parse_game_line(old_state, words)
+    return parse_game_line(state, words)
 
 
 def parse_phase_setup_line(old_state: GameState, words) -> GameState:
