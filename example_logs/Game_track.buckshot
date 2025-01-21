@@ -22,7 +22,7 @@ round II.1
 player gets glass, glass; dealer gets glass, beer
 dealer loads 1 live, 1 blank
 player shoots self, live
-!check dealer charges = 3
+!check player charges = 3
 dealer shoots self, blank
 
 # https://youtu.be/8u8H-3WcP3o?t=161
