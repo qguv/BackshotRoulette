@@ -46,9 +46,9 @@ dealer shoots self, blank
 # https://youtu.be/8u8H-3WcP3o?t=250
 round II.3
 player gets beer, cigs; dealer gets glass, cigs
-dealer loads 3 live, 2 blanks
+dealer loads 3 live, 2 blank
 player shoots self, live
-!check player charges 3
+!check player charges = 3
 dealer uses glass
 dealer uses cuffs
 dealer uses cigs
