@@ -81,7 +81,7 @@ class GameState:
                     (target_name == "player" and self.is_double_or_nothing_mode)
 
                     # or the target dies in the last phase
-                    or (self.num_completed_phases == self.total_phases - 1)
+                    or (self.num_completed_phases == self.total_phases)
                 ):
                     self.winner = non_target_name
 
