@@ -4,7 +4,7 @@ from copy import deepcopy
 from sys import exit
 
 from game_state import GameState, PhaseState, Player, RoundState
-from roulette import Items, ValidMoves
+from roulette import Items
 
 items_by_name = {
     "cuffs": Items.HANDCUFFS,
@@ -17,6 +17,10 @@ items_by_name = {
 
 class LogParseError(Exception):
     '''exited without validating the entire log'''
+    pass
+
+
+class InvalidLine(LogParseError):
     pass
 
 
@@ -52,7 +56,7 @@ def parse_line(old_state: GameState, line):
     if len(conjoined_lines) > 1:
         new_state = old_state
         for conjoined_line in conjoined_lines:
-            new_state = old_state.parse_line(conjoined_line)
+            new_state = parse_line(old_state, conjoined_line)
         return new_state
 
     line = line.strip()
@@ -73,6 +77,13 @@ def parse_line(old_state: GameState, line):
         return SetupError("game over")
 
     words = line.split()
+
+    try:
+        check_query_line(old_state, words)
+        return old_state
+    except NoMatch:
+        pass
+
     if old_state.phase is None:
         # TODO: maybe give context that we can only accept phase setup commands?
         return parse_phase_setup_line(old_state, words)
@@ -81,13 +92,8 @@ def parse_line(old_state: GameState, line):
         # TODO: maybe give context that we can only accept round setup commands?
         return parse_round_setup_line(old_state, words)
 
-    try:
-        check_query_line(old_state, words)
-        return old_state
-    except NoMatch:
-        pass
-
     if (words[0] == "dealer") == old_state.phase.round.is_players_turn:
+        print("the line just read is:", words)
         raise TurnError()
 
     return parse_game_line(old_state, words)
@@ -123,6 +129,7 @@ def parse_round_setup_line(old_state: GameState, words) -> GameState:
     match words:
 
         # just for decoration
+        # TODO: make this a check
         case ["round", _phase_num, ".", _round_num]:
             phase_num = len(_phase_num) - 1
             if phase_num != new_state.num_completed_phases:
@@ -140,7 +147,9 @@ def parse_round_setup_line(old_state: GameState, words) -> GameState:
             new_state.phase.players[player].items.update(items)
 
         # this line actually starts the round
-        case ["dealer", "loads", total_live_shells, "live", ",", total_blank_shells, "blank"]:
+        case ["dealer", "loads", _total_live_shells, "live", ",", _total_blank_shells, "blank"]:
+            total_live_shells = int(_total_live_shells)
+            total_blank_shells = int(_total_blank_shells)
             new_state.phase.round = RoundState(
                 total_live_shells=total_live_shells,
                 total_blank_shells=total_blank_shells,
@@ -153,20 +162,38 @@ def parse_round_setup_line(old_state: GameState, words) -> GameState:
 def check_query_line(state: GameState, words) -> None:
     match words:
 
-        case ["!check", player_name, "charges", "=", value]:
+        case ["!check", player_name, "charges", "=", _value]:
+            value = int(_value)
+            if state.phase is None:
+                if value != 0:
+                    raise CheckFailed(f"0 (because phase hasn't begun) != {value}")
+                return
+            if player_name not in state.phase.players:
+                raise InvalidLine(f"no such player {player_name}")
             player_charges = state.phase.players[player_name].charges
             if player_charges != int(value):
                 raise CheckFailed(f"{player_charges} != {value}")
 
         case ["!check", player_name, "items", "=", *separated_item_names]:
-
             # skip separators (odd-numbered elements)
             item_names = separated_item_names[::2]
 
             items = set(items_by_name[item_name.strip()] for item_name in item_names)
+
+            if state.phase is None and len(separated_item_names) != 0:
+                raise CheckFailed(f"no items (because phase hasn't begun) != {sorted(items)}")
+
             player_items = state.phase.players[player_name].items
             if player_items != items:
                 raise CheckFailed(f"{sorted(player_items)} != {sorted(items)}")
+
+        case [player_name, "wins", "phase", _phase_num]:
+            phase_num = len(_phase_num) - 1
+            if phase_num != state.num_completed_phases - 1:
+                raise InvalidLine(f"expected a round in phase {"I" * (state.num_completed_phases)}")
+            winner_name = state.winner_names_by_phase[phase_num]
+            if player_name != winner_name:
+                raise CheckFailed(f"b-b-b-but {winner_name} won!!!!!11")
 
         case _:
             raise NoMatch("expecting query line")
@@ -180,6 +207,8 @@ def parse_game_line(old_state: GameState, words) -> GameState:
             if target_name == "self":
                 target_name = player_name
             is_live = (_shell_type == "live")
+
+            # FIXME: check if this round is possible
 
             new_state.shoot(target_name, is_live)
 

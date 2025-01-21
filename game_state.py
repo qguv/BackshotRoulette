@@ -25,16 +25,13 @@ class RoundState:
     def total_shells(self) -> int:
         return self.total_live_shells + self.total_blank_shells
 
-    def finish_turn(self):
-        self.is_players_turn = not self.is_players_turn
-
     def eject_shell(self):
         pass
 
 @dataclass
 class Player:
     charges: int
-    items: Set[Items] = field(default_factory=list)
+    items: Set[Items] = field(default_factory=set)
 
 @dataclass
 class PhaseState:
@@ -51,6 +48,7 @@ class GameState:
     total_phases: int = 3
     num_completed_phases: int = 0
     winner: Optional[str] = None
+    winner_names_by_phase: List[str] = field(default_factory=list) # just for sanity checking logs
 
     def shoot(self, target_name, is_live):
         non_target_name = "dealer" if target_name == "player" else "player"
@@ -65,6 +63,11 @@ class GameState:
             # if the target died
             if self.phase.players[target_name].charges <= 0:
 
+                # the non-target wins the phase
+                self.winner_names_by_phase.append(non_target_name)
+                self.num_completed_phases += 1
+                self.phase = None
+
                 # the non-target wins the game if:
                 if (
                     # the human player dies in double-or-nothing mode
@@ -75,9 +78,6 @@ class GameState:
                 ):
                     self.winner = non_target_name
 
-                # end the phase
-                self.phase = None
-                self.num_completed_phases += 1
                 return
 
         self.phase.round.past_shells.append(is_live)
