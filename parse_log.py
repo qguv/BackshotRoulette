@@ -162,17 +162,17 @@ def parse_round_setup_line(old_state: GameState, words) -> GameState:
 def check_query_line(state: GameState, words) -> None:
     match words:
 
-        case ["!check", player_name, "charges", "=", _value]:
-            value = int(_value)
+        case ["!check", player_name, "charges", "=", _expected_value]:
+            expected_value = int(_expected_value)
             if state.phase is None:
-                if value != 0:
-                    raise CheckFailed(f"0 (because phase hasn't begun) != {value}")
+                if expected_value != 0:
+                    raise CheckFailed(f"actually, {player_name} has 0 charges because the phase hasn't begun")
                 return
             if player_name not in state.phase.players:
                 raise InvalidLine(f"no such player {player_name}")
             player_charges = state.phase.players[player_name].charges
-            if player_charges != int(value):
-                raise CheckFailed(f"{player_charges} != {value}")
+            if player_charges != int(expected_value):
+                raise CheckFailed(f"actually, {player_name} has {player_charges} charges")
 
         case ["!check", player_name, "items", "=", *_separated_expected_item_names]:
 
@@ -181,17 +181,29 @@ def check_query_line(state: GameState, words) -> None:
             expected_items = sorted(items_by_name[name.strip()] for name in _expected_item_names)
 
             if state.phase is None and len(expected_items) != 0:
-                raise CheckFailed(f"no items (because phase hasn't begun) != {expected_items}")
+                raise CheckFailed(f"actually, {player_name} has no items because the phase hasn't begun")
 
             items = sorted(state.phase.players[player_name].items)
             if items != expected_items:
-                raise CheckFailed(f"{items} != {expected_items}")
+                raise CheckFailed(f"actually, {player_name} has {items}")
 
-        case [player_name, "wins", "phase", _phase_num]:
-            phase_num = len(_phase_num) - 1
-            if phase_num != state.num_completed_phases - 1:
+        case ["!check", "shells", "=", _expected_num_live, "live", ",", _expected_num_blank, "blank"]:
+            expected_num_live = int(_expected_num_live)
+            expected_num_blank = int(_expected_num_blank)
+            if state.phase is None or state.phase.round is None:
+                if expected_num_live != 0 or expected_num_blank != 0:
+                    raise CheckFailed("actually, there are no shells because the round hasn't begun")
+                return
+            num_live = state.phase.round.remaining_live_shells()
+            num_blank = state.phase.round.remaining_blank_shells()
+            if num_live != expected_num_live or num_blank != expected_num_blank:
+                raise CheckFailed(f"actually, there are {num_live} live, {num_blank} blank shells left")
+
+        case [player_name, "wins", "phase", _expected_phase_num]:
+            expected_phase_num = len(_expected_phase_num) - 1
+            if expected_phase_num != state.num_completed_phases - 1:
                 raise InvalidLine(f"expected a round in phase {"I" * (state.num_completed_phases)}")
-            winner_name = state.winner_names_by_phase[phase_num]
+            winner_name = state.winner_names_by_phase[expected_phase_num]
             if player_name != winner_name:
                 raise CheckFailed(f"actually, {winner_name} won")
 
