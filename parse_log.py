@@ -211,7 +211,9 @@ def parse_game_line(old_state: GameState, words) -> GameState:
                 target_name = player_name
             is_live = (_shell_type == "live")
 
-            # FIXME: check if this round is possible
+            # check if this is possible
+            if not new_state.phase.round.has_shell(is_live):
+                raise GameError(f"no {_shell_type} shells left to shoot")
 
             new_state.shoot(target_name, is_live)
 
@@ -233,10 +235,14 @@ def parse_game_line(old_state: GameState, words) -> GameState:
                 case [Items.HANDCUFFS]:
                     new_state.phase.round.handcuffed_player_names.add("dealer" if player_name == "player" else "player")
                 case [Items.MAGNIFYING_GLASS, ",", "sees", _shell_type]:
+                    is_live = _shell_type == "live"
+                    if not new_state.phase.round.has_shell(is_live):
+                        raise GameError(f"no {_shell_type} shells left to shoot")
                     # TODO: something epistemic with _shell_type
-                    pass
                 case [Items.BEER, ",", "ejects", _shell_type]:
                     is_live = _shell_type == "live"
+                    if not new_state.phase.round.has_shell(is_live):
+                        raise GameError(f"no {_shell_type} shells left to shoot")
                     new_state.eject_shell(is_live)
                     # TODO: something epistemic with _shell_type
                 case _:

@@ -28,6 +28,12 @@ class RoundState:
     def eject_shell(self):
         pass
 
+    def has_shell(self, is_live):
+        if is_live:
+            return self.remaining_live_shells() > 0
+        return self.remaining_blank_shells() > 0
+
+
 @dataclass
 class Player:
     charges: int
