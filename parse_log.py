@@ -71,10 +71,6 @@ def parse_line(state: GameState, line):
     for c in ',.=':
         line = line.replace(c, f" {c} ")
 
-    # TODO: handle repeated games in double-or-nothing mode
-    if state.winner is not None:
-        raise SetupError("game over")
-
     words = line.split()
 
     try:
@@ -82,6 +78,10 @@ def parse_line(state: GameState, line):
         return state
     except NoMatch:
         pass
+
+    # TODO: handle repeated games in double-or-nothing mode
+    if state.winner is not None:
+        raise SetupError("game over")
 
     if state.phase is None:
         # TODO: maybe give context that we can only accept phase setup commands?
