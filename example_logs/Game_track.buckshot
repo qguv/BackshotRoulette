@@ -1,4 +1,4 @@
-# from https://www.youtube.com/watch?v=8u8H-3WcP3o
+# https://youtu.be/8u8H-3WcP3o?t=42
 phase I, 2 charges
 
 round I.1
@@ -8,12 +8,14 @@ player shoots dealer, live
 !check dealer charges = 1
 dealer shoots self, blank
 
+# https://youtu.be/8u8H-3WcP3o?t=85
 round I.2
 dealer loads 3 live, 2 blank
 player shoots dealer, live
 !check dealer charges = 0
 player wins phase I
 
+# https://youtu.be/8u8H-3WcP3o?t=113
 phase II, 4 charges
 
 round II.1
@@ -23,6 +25,7 @@ player shoots self, live
 !check dealer charges = 3
 dealer shoots self, blank
 
+# https://youtu.be/8u8H-3WcP3o?t=161
 round II.2
 player gets knife, cigs
 dealer gets cuffs, cigs
@@ -40,6 +43,7 @@ dealer smokes
 !check dealer charges = 3
 dealer shoots self, blank
 
+# https://youtu.be/8u8H-3WcP3o?t=250
 round II.3
 player gets beer, cigs; dealer gets glass, cigs
 dealer loads 3 live, 2 blanks
@@ -61,6 +65,7 @@ player uses cigs
 player shoots dealer, live
 !check dealer charges = 3
 
+# https://youtu.be/8u8H-3WcP3o?t=344
 round II.4
 !check player items = beer
 !check dealer items empty
@@ -78,6 +83,7 @@ player shoots dealer, live
 dealer shoots self, blank
 dealer shoots self, blank
 
+# https://youtu.be/8u8H-3WcP3o?t=433
 round II.5
 !check dealer charges = 1
 !check player charges = 3
@@ -91,6 +97,7 @@ player uses beer, ejects live
 player shoots dealer, live
 player wins phase II
 
+# https://youtu.be/8u8H-3WcP3o?t=489
 phase III, 4+2 charges
 # scissors appear
 
@@ -107,6 +114,7 @@ player shoots dealer, live
 !check dealer charges = 2+2
 # dealer breaks cuffs
 
+# https://youtu.be/8u8H-3WcP3o?t=600
 round III.2
 !check dealer charges = 2+2
 !check player charges = 2+2
@@ -138,6 +146,7 @@ player uses cigs
 !check player charges = 4+2
 player uses beer, eject live
 
+# https://youtu.be/8u8H-3WcP3o?t=728
 round III.3
 !check player items = glass
 !check player charges = 4+2
@@ -161,6 +170,7 @@ player shoots dealer, live
 !check dealer charges = 1+2
 # dealer breaks cuffs
 
+# https://youtu.be/8u8H-3WcP3o?t=833
 round III.4
 !check player items = beer, beer
 !check dealer items = knife, knife, knife, cigs
@@ -183,6 +193,7 @@ dealer uses cigs
 !check dealer charges = 0+1
 dealer shoots self, blank
 
+# https://youtu.be/8u8H-3WcP3o?t=932
 round III.5
 !check dealer charges = 0+1
 !check player charges = 3+2
