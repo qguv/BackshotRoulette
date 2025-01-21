@@ -38,8 +38,8 @@ player uses glass, sees live
 player uses knife
 player shoots dealer, live
 !check dealer charges = 2
-dealer drinks beer, ejects live
-dealer smokes
+dealer uses beer, ejects live
+dealer uses cigs
 !check dealer charges = 3
 dealer shoots self, blank
 
@@ -51,7 +51,7 @@ player shoots self, live
 !check player charges 3
 dealer uses glass
 dealer uses cuffs
-dealer smokes
+dealer uses cigs
 !check dealer charges = 4
 dealer shoots self, blank
 dealer uses glass
@@ -126,9 +126,9 @@ player shoots self, blank
 player uses beer, ejects blank
 player shoots dealer, blank
 dealer uses glass
-dealer smokes
+dealer uses cigs
 !check dealer charges 3+2
-dealer smokes
+dealer uses cigs
 !check dealer charges 4+2
 dealer uses knife
 dealer uses cuffs
