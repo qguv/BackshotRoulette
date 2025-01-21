@@ -117,7 +117,7 @@ player shoots dealer, live
 # https://youtu.be/8u8H-3WcP3o?t=600
 round III.2
 !check dealer charges = 4
-!check player charges = 4
+!check player charges = 6
 !check dealer items = cigs, knife, glass, cigs
 !check player items = cigs
 player gets beer, cigs, beer, glass; dealer gets knife, knife, beer, cuffs
