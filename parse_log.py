@@ -138,13 +138,15 @@ def parse_round_setup_line(old_state: GameState, words) -> GameState:
             if round_num != new_state.phase.num_completed_rounds:
                 return SetupError(f"expected round {new_state.phase.num_completed_rounds + 1}")
 
-        case [player, "gets", *separated_item_names]:
+        case [player_name, "gets", *separated_item_names]:
 
             # skip separators (odd-numbered elements)
             item_names = separated_item_names[::2]
 
-            items = set(items_by_name[item_name.strip()] for item_name in item_names)
-            new_state.phase.players[player].items.update(items)
+            items = [items_by_name[item_name.strip()] for item_name in item_names]
+            new_state.phase.players[player_name].items.extend(items)
+            if len(new_state.phase.players[player_name].items) > new_state.max_items:
+                raise GameError(f"{player_name} has too many items")
 
         # this line actually starts the round
         case ["dealer", "loads", _total_live_shells, "live", ",", _total_blank_shells, "blank"]:
@@ -175,17 +177,18 @@ def check_query_line(state: GameState, words) -> None:
                 raise CheckFailed(f"{player_charges} != {value}")
 
         case ["!check", player_name, "items", "=", *separated_item_names]:
+
             # skip separators (odd-numbered elements)
             item_names = separated_item_names[::2]
 
-            items = set(items_by_name[item_name.strip()] for item_name in item_names)
+            items = [items_by_name[item_name.strip()] for item_name in item_names]
 
             if state.phase is None and len(separated_item_names) != 0:
-                raise CheckFailed(f"no items (because phase hasn't begun) != {sorted(items)}")
+                raise CheckFailed(f"no items (because phase hasn't begun) != {sorted(item_names)}")
 
             player_items = state.phase.players[player_name].items
             if player_items != items:
-                raise CheckFailed(f"{sorted(player_items)} != {sorted(items)}")
+                raise CheckFailed(f"{player_items} != {sorted(item_names)}")
 
         case [player_name, "wins", "phase", _phase_num]:
             phase_num = len(_phase_num) - 1
@@ -216,7 +219,7 @@ def parse_game_line(old_state: GameState, words) -> GameState:
             item = items_by_name[item_name]
             try:
                 new_state.phase.players[player_name].items.remove(item)
-            except KeyError:
+            except ValueError:
                 raise GameError(f"{player_name} doesn't have {item_name}")
 
             match [item, *item_args]:
@@ -232,7 +235,7 @@ def parse_game_line(old_state: GameState, words) -> GameState:
                 case [Items.MAGNIFYING_GLASS, ",", "sees", _shell_type]:
                     # TODO: something epistemic with _shell_type
                     pass
-                case [Items.BEER, ",", "sees", _shell_type]:
+                case [Items.BEER, ",", "ejects", _shell_type]:
                     is_live = _shell_type == "live"
                     new_state.eject_shell(is_live)
                     # TODO: something epistemic with _shell_type

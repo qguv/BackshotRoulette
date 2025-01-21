@@ -31,7 +31,7 @@ class RoundState:
 @dataclass
 class Player:
     charges: int
-    items: Set[Items] = field(default_factory=set)
+    items: List[Items] = field(default_factory=list)
 
 @dataclass
 class PhaseState:
@@ -49,6 +49,7 @@ class GameState:
     num_completed_phases: int = 0
     winner: Optional[str] = None
     winner_names_by_phase: List[str] = field(default_factory=list) # just for sanity checking logs
+    max_items: int = 8
 
     def shoot(self, target_name, is_live):
         non_target_name = "dealer" if target_name == "player" else "player"
