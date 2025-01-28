@@ -1,0 +1,29 @@
+phase I, 1 charges
+
+round I.1
+player gets phone
+dealer gets phone
+dealer loads 2 live, 3 blank
+player shoots dealer, blank
+!check shells = 2 live, 2 blank
+dealer uses phone
+# dealer learns that the third shell is live
+dealer shoots player, blank
+!check shells = 2 live, 1 blank
+
+# if there were no items, the player would have no preference between shooting self and dealer, reasoning as follows:
+#   if player shoots dealer:
+#     if current shell is live (50% chance), player wins
+#     if current shell is blank (50% chance), only live shells will remain, dealer will know this, dealer will shoot, player loses
+#   if player shoots self:
+#     if current shell is live (50% chance), player loses
+#     if current shell is blank (50% chance), player gets another turn, only live shells will remain, player will know this, player will shoot dealer, player wins
+
+player uses phone, hears second live
+
+# damn, this doesn't actually change the reasoning
+
+player shoots self, blank
+!check shells = 2 live, 0 blank
+player shoots dealer, live
+player wins phase I

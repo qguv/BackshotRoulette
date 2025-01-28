@@ -28,6 +28,8 @@ class Items(IntEnum):
     INVERTER = 6
     EXPIRED_MEDICINE = 7
     BURNER_PHONE = 8
+    JAMMER = 9
+    REMOTE = 10
 
 class LoadedShells:
     def __init__(self, *shells):

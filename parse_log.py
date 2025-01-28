@@ -1,19 +1,51 @@
 from argparse import ArgumentParser, FileType
 from collections import OrderedDict
 from copy import deepcopy
-from sys import exit
+from sys import exit, stderr
 
 from game_state import GameState, PhaseState, Player, RoundState
 from roulette import Items
 
 items_by_name = {
-    "cuffs": Items.HANDCUFFS,
-    "cigs": Items.CIGARETTES,
-    "knife": Items.HAND_SAW,
     "beer": Items.BEER,
+    "cigs": Items.CIGARETTES,
+    "cuffs": Items.HANDCUFFS,
     "glass": Items.MAGNIFYING_GLASS,
+    "knife": Items.HAND_SAW,
+    "phone": Items.BURNER_PHONE,
 }
 
+story_mode_items = set([
+    Items.BEER,
+    Items.CIGARETTES,
+    Items.HAND_SAW,
+    Items.HANDCUFFS,
+    Items.MAGNIFYING_GLASS,
+])
+
+double_or_nothing_items = set([
+    Items.ADRENALINE,
+    Items.BEER,
+    Items.BURNER_PHONE,
+    Items.CIGARETTES,
+    Items.EXPIRED_MEDICINE,
+    Items.HAND_SAW,
+    Items.HANDCUFFS,
+    Items.INVERTER,
+    Items.MAGNIFYING_GLASS,
+])
+
+multiplayer_items = set([
+    Items.ADRENALINE,
+    Items.BEER,
+    Items.BURNER_PHONE,
+    Items.CIGARETTES,
+    Items.HAND_SAW,
+    Items.INVERTER,
+    Items.JAMMER,
+    Items.MAGNIFYING_GLASS,
+    Items.REMOTE,
+])
 
 class LogParseError(Exception):
     '''exited without validating the entire log'''
@@ -85,7 +117,7 @@ def parse_line(state: GameState, line):
 
     if state.phase is None:
         # TODO: maybe give context that we can only accept phase setup commands?
-        return parse_phase_setup_line(state, words)
+        return parse_game_setup_line(state, words)
 
     if state.phase.round is None:
         # TODO: maybe give context that we can only accept round setup commands?
@@ -97,9 +129,12 @@ def parse_line(state: GameState, line):
     return parse_game_line(state, words)
 
 
-def parse_phase_setup_line(old_state: GameState, words) -> GameState:
+def parse_game_setup_line(old_state: GameState, words) -> GameState:
     new_state = deepcopy(old_state)
     match words:
+
+        case ["player", "uses", "pills"]:
+            new_state.is_double_or_nothing_mode = True
 
         case ["phase", phase_name, ",", _max_charges, "charges", *more]:
             # phase in log: one-indexed tally numerals
@@ -134,6 +169,7 @@ def parse_phase_setup_line(old_state: GameState, words) -> GameState:
                     raise NoMatch(f"expecting: phase {expected_phase_num}, {{{{int}}}} charges, critical at {{{{int}}}}")
 
         case _:
+            expected_phase_num = new_state.num_completed_phases
             raise NoMatch(f"expecting: phase {expected_phase_num}, {{{{int}}}} charges")
     return new_state
 
@@ -225,6 +261,8 @@ def check_query_line(state: GameState, words) -> None:
                         raise CheckFailed(f"actually, {winner_name} won phase {expected_phase_name}")
 
                 case ["game"]:
+                    if state.winner is None:
+                        raise CheckFailed("actually, the game is ongoing")
                     if state.winner != expected_winner_name:
                         raise CheckFailed(f"actually, {state.winner} won the game")
 
@@ -237,6 +275,7 @@ def check_query_line(state: GameState, words) -> None:
 def parse_game_line(old_state: GameState, words) -> GameState:
     new_state = deepcopy(old_state)
     match words:
+        # TODO check that the shell type doesn't clash with a shell we just saw using the glass
         case [player_name, "shoots", target_name, ",", _shell_type]:
 
             # parse line
@@ -266,6 +305,18 @@ def parse_game_line(old_state: GameState, words) -> GameState:
                             new_state.phase.players[player_name].charges + 1,
                         )
 
+                case [player_name, "uses", "phone"]:
+                    if player_name == "player":
+                        raise GameError("missing information: what did the player see?")
+                    # TODO: something epistemic
+                    pass
+
+                case [player_name, "uses", "phone", ",", "hears", shell_cardinal, shell_type]:
+                    if player_name != "player":
+                        raise GameError("too much information: we shouldn't know what they see")
+                    # TODO: something epistemic
+                    pass
+
                 case [player_name, "uses", "knife"]:
                     new_state.phase.round.gun_is_sawed = True
 
@@ -273,11 +324,15 @@ def parse_game_line(old_state: GameState, words) -> GameState:
                     other_player = "dealer" if player_name == "player" else "player"
                     new_state.phase.round.handcuffed_player_names.add(other_player)
 
-                case ["dealer", "uses", "glass"]:
+                case [player_name, "uses", "glass"]:
+                    if player_name == "player":
+                        raise GameError("missing information: what did the player see?")
                     # TODO: something epistemic
                     pass
 
-                case ["player", "uses", "glass", ",", "sees", _shell_type]:
+                case [player_name, "uses", "glass", ",", "sees", _shell_type]:
+                    if player_name != "player":
+                        raise GameError("too much information: we shouldn't know what they see")
                     is_live = _shell_type == "live"
                     if not new_state.phase.round.has_shell(is_live):
                         raise GameError(f"no {_shell_type} shells left to shoot")
@@ -305,24 +360,27 @@ def parse_logfile(f):
         try:
             game_state = parse_line(game_state, line)
         except Exception as e:
-            print("line", i+1)
-            print(line.strip())
+            print(f"{logfile.name} failed", file=stderr)
+            print("line", i+1, file=stderr)
+            print(line.strip(), file=stderr)
             if isinstance(e, LogParseError):
-                print(e)
+                print(e, file=stderr)
                 return
             else:
                 raise e
+    print(f"{logfile.name} ok", file=stderr)
     return game_state
 
 
 def parse_args():
     parser = ArgumentParser()
-    parser.add_argument("LOGFILE", type=FileType('r'))
+    parser.add_argument("LOGFILE", nargs="+", type=FileType('r'))
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_args()
-    game = parse_logfile(args.LOGFILE)
-    error_when = game is None
-    exit(error_when)
+    for logfile in args.LOGFILE:
+        game = parse_logfile(logfile)
+        if not game:
+            exit(1)

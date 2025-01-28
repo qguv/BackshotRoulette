@@ -1,0 +1,73 @@
+phase I, 1 charges
+
+round I.1
+player gets phone
+dealer gets phone
+dealer loads 1 live, 4 blank
+player shoots dealer, blank
+!check shells = 1 live, 3 blank
+dealer uses phone
+# dealer learns that the third shell is live
+dealer shoots player, blank
+!check shells = 1 live, 2 blank
+
+# if there were no items, the player would reason as follows:
+#   if player shoots dealer:
+#     if shell is live (33% chance), player wins
+#     if shell is blank (67% chance), now there's 1 live, 1 blank:
+#       if dealer shoots player:
+#         if shell is live (50% chance), player loses
+#         if shell is blank (50% chance), everyone knows the last shell is live, player can shoot dealer, player wins
+#       if dealer shoots self:
+#         if shell is live (50% chance), player wins
+#         if shell is blank (50% chance), dealer gets another turn, everyone knows the last shell is live, dealer can shoot player, player loses
+#   if player shoots self:
+#     if shell is live (33% chance), player loses
+#     if shell is blank (67% chance), player gets another turn, now there's 1 live, 1 blank:
+#       if player shoots dealer:
+#         if shell is live (50% chance), player wins
+#         if shell is blank (50% chance), everyone knows the last shell is live, dealer can shoot player, player loses
+#       if player shoots self:
+#         if shell is live (50% chance), player loses
+#         if shell is blank (50% chance), player gets another turn, everyone knows the last shell is live, player can shoot dealer, player wins
+# player reasons that:
+# shooting dealer gives 33% + (67% * 50%) chance of winning
+# shooting self gives (67% * 50%) chance of winning
+# so player will shoot self
+
+player uses phone, hears second live
+
+# THE REST OF THE REASONING IS WRONG, BECAUSE KNOWING 2 LIVE IS KNOWING 1 AND 3 ARE BLANK
+
+# ignoring that the dealer heard the same information, the player would reason as follows:
+#   if player shoots dealer:
+#     if shell is live (33% chance), player wins
+#     if shell is blank (67% chance), now the next shell is live and the last is a blank
+#       if dealer shoots player (equal strategy for dealer), the player loses
+#       if dealer shoots self (equal strategy for dealer), the player wins
+#   if player shoots self:
+#     if shell is live (33% chance), player loses
+#     if shell is blank (67% chance), player gets another turn, now the next shell is live, the player can shoot the dealer and win
+# player reasons that:
+# shooting dealer gives 33% + (67% * 50%) = 63% chance of winning
+# shooting self gives 67% chance of winning
+# so player will shoot self
+
+# but the player knows that the dealer got the same information as them!
+# so if the player shoots the dealer with a blank,
+# the dealer will have 100% odds to kill the player (instead of 50%).
+# so the reasoning is as follows:
+#   if player shoots dealer:
+#     if shell is live (33% chance), player wins
+#     if shell is blank (67% chance), now EVERYONE knows the next shell is live and the last is a blank, dealer will shoot the player, player loses
+#   if player shoots self:
+#     if shell is live (33% chance), player loses
+#     if shell is blank (67% chance), player gets another turn, now the next shell is live, the player can shoot the dealer and win
+# player reasons that:
+# shooting dealer gives 33% chance of winning
+# shooting self gives 67% chance of winning
+# so player will shoot self
+
+player shoots self, blank
+player shoots dealer, live
+player wins phase I
