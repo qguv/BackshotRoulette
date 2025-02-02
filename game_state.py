@@ -2,6 +2,7 @@ from collections import OrderedDict
 from dataclasses import dataclass, field
 from typing import List, Optional, Set
 
+from exceptions import GameError
 from roulette import Items
 
 # true is live, false is blank

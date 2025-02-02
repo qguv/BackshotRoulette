@@ -3,6 +3,7 @@ from collections import OrderedDict
 from copy import deepcopy
 from sys import exit, stderr
 
+from exceptions import GameError, TurnError
 from game_state import GameState, PhaseState, Player, RoundState
 from roulette import Items
 
@@ -69,17 +70,6 @@ class SetupError(LogParseError):
 class CheckFailed(LogParseError):
     '''!check line failed'''
     pass
-
-
-class GameError(LogParseError):
-    '''log line doesn't follow logic of game'''
-    pass
-
-
-class TurnError(GameError):
-    '''out-of-turn move'''
-    def __str__(self):
-        return "not your turn"
 
 
 def parse_line(state: GameState, line):
@@ -363,7 +353,7 @@ def parse_logfile(f):
             print(f"{logfile.name} failed", file=stderr)
             print("line", i+1, file=stderr)
             print(line.strip(), file=stderr)
-            if isinstance(e, LogParseError):
+            if isinstance(e, LogParseError) or isinstance(e, GameError):
                 print(e, file=stderr)
                 return
             else:
