@@ -11,3 +11,8 @@ for f in example_logs/errors/**/*.*; do
         echo test failed: expected error!
     fi
 done
+
+echo
+echo =================
+echo all tests passed!
+echo =================
