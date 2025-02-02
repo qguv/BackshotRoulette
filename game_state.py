@@ -27,18 +27,19 @@ class RoundState:
     def total_shells(self) -> int:
         return self.total_live_shells + self.total_blank_shells
 
-    def eject_shell(self):
-        pass
-
     def learn_future_shell(self, shells_from_now, is_live):
         self.assert_future_shell(shells_from_now, is_live)
         self.known_shells[len(self.past_shells) + shells_from_now] = is_live
 
     def assert_future_shell(self, shells_from_now, is_live):
 
+        # are there enough shells?
+        i = len(self.past_shells) + shells_from_now
+        if i >= self.total_shells():
+            raise GameError("not enough shells to learn that!")
+
         # does it contradict with something we learned
         try:
-            i = len(self.past_shells) + shells_from_now
             known_shell_is_live = self.known_shells[i]
             if known_shell_is_live != is_live:
                 raise GameError(f"player knows this shell to be {"live" if known_shell_is_live else "blank"}")

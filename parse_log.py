@@ -190,6 +190,7 @@ def parse_round_setup_line(old_state: GameState, words) -> GameState:
                 raise SetupError(f"expected round {new_state.phase.num_completed_rounds + 1}")
 
         case [player_name, "gets", *separated_item_names]:
+            # future TODO check that all players got the same number of new items _this round_
 
             # skip separators (odd-numbered elements)
             item_names = separated_item_names[::2]
