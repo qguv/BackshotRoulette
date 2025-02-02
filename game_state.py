@@ -36,22 +36,19 @@ class RoundState:
         # are there enough shells?
         i = len(self.past_shells) + shells_from_now
         if i >= self.total_shells():
-            raise GameError("not enough shells to learn that!")
+            raise GameError("actually, there aren't enough shells to learn that!")
 
         # does it contradict with something we learned
         try:
             known_shell_is_live = self.known_shells[i]
             if known_shell_is_live != is_live:
-                raise GameError(f"player knows this shell to be {"live" if known_shell_is_live else "blank"}")
+                raise GameError(f"actually, player knows this shell to be {"live" if known_shell_is_live else "blank"}")
 
         # does it contradict with something we can deduce based on shell count
         except KeyError:
             remaining_matching_shells = self.remaining_live_shells() if is_live else self.remaining_blank_shells()
             if remaining_matching_shells < 1:
-                raise GameError(f"no {"live" if is_live else "blank"} shells left")
-
-
-
+                raise GameError(f"actually, there are no {"live" if is_live else "blank"} shells left")
 
 @dataclass
 class Player:
