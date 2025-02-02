@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from argparse import ArgumentParser, FileType
 from collections import OrderedDict
 from copy import deepcopy
