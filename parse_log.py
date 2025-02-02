@@ -7,6 +7,16 @@ from exceptions import GameError, TurnError
 from game_state import GameState, PhaseState, Player, RoundState
 from roulette import Items
 
+cardinal_to_ordinal = {
+    "second": 1,
+    "third": 2,
+    "fourth": 3,
+    "fifth": 4,
+    "sixth": 5,
+    "seventh": 6,
+    "eighth": 7,
+}
+
 items_by_name = {
     "beer": Items.BEER,
     "cigs": Items.CIGARETTES,
@@ -273,10 +283,6 @@ def parse_game_line(old_state: GameState, words) -> GameState:
                 target_name = player_name
             is_live = (_shell_type == "live")
 
-            # check if this is possible
-            if not new_state.phase.round.has_shell(is_live):
-                raise GameError(f"no {_shell_type} shells left to shoot")
-
             new_state.shoot(target_name, is_live)
 
         case [player_name, "uses", item_name, *_]:
@@ -297,15 +303,18 @@ def parse_game_line(old_state: GameState, words) -> GameState:
 
                 case [player_name, "uses", "phone"]:
                     if player_name == "player":
-                        raise GameError("missing information: what did the player see?")
+                        raise LogParseError("missing information: what did the player see?")
                     # TODO: something epistemic
                     pass
 
                 case [player_name, "uses", "phone", ",", "hears", shell_cardinal, shell_type]:
+                    try:
+                        shells_from_now = cardinal_to_ordinal[shell_cardinal]
+                    except KeyError:
+                        raise LogParseError("unknown cardinal (use 'second', 'third', etc.)")
                     if player_name != "player":
-                        raise GameError("too much information: we shouldn't know what they see")
-                    # TODO: something epistemic
-                    pass
+                        raise LogParseError("too much information: we shouldn't know what they see")
+                    new_state.phase.round.learn_future_shell(shells_from_now, shell_type)
 
                 case [player_name, "uses", "knife"]:
                     new_state.phase.round.gun_is_sawed = True
@@ -324,16 +333,11 @@ def parse_game_line(old_state: GameState, words) -> GameState:
                     if player_name != "player":
                         raise GameError("too much information: we shouldn't know what they see")
                     is_live = _shell_type == "live"
-                    if not new_state.phase.round.has_shell(is_live):
-                        raise GameError(f"no {_shell_type} shells left to shoot")
-                    # TODO: something epistemic with _shell_type
+                    new_state.phase.round.learn_future_shell(0, is_live)
 
                 case [player_name, "uses", "beer", ",", "ejects", _shell_type]:
                     is_live = _shell_type == "live"
-                    if not new_state.phase.round.has_shell(is_live):
-                        raise GameError(f"no {_shell_type} shells left to shoot")
                     new_state.eject_shell(is_live)
-                    # TODO: something epistemic with _shell_type
 
                 case _:
                     raise NoMatch("expecting game line")

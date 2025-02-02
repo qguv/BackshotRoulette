@@ -1,6 +1,6 @@
 from collections import OrderedDict
 from dataclasses import dataclass, field
-from typing import List, Optional, Set
+from typing import Dict, List, Optional, Set
 
 from exceptions import GameError
 from roulette import Items
@@ -16,6 +16,7 @@ class RoundState:
     is_players_turn: bool = True
     gun_is_sawed: bool = False
     handcuffed_player_names: Set[str] = field(default_factory=set)
+    known_shells: Dict[int, ShellType] = field(default_factory=dict)
 
     def remaining_live_shells(self) -> int:
         return self.total_live_shells - sum(1 for is_live in self.past_shells if is_live)
@@ -29,10 +30,26 @@ class RoundState:
     def eject_shell(self):
         pass
 
-    def has_shell(self, is_live):
-        if is_live:
-            return self.remaining_live_shells() > 0
-        return self.remaining_blank_shells() > 0
+    def learn_future_shell(self, shells_from_now, is_live):
+        self.assert_future_shell(shells_from_now, is_live)
+        self.known_shells[len(self.past_shells) + shells_from_now] = is_live
+
+    def assert_future_shell(self, shells_from_now, is_live):
+
+        # does it contradict with something we learned
+        try:
+            i = len(self.past_shells) + shells_from_now
+            known_shell_is_live = self.known_shells[i]
+            if known_shell_is_live != is_live:
+                raise GameError(f"player knows this shell to be {"live" if known_shell_is_live else "blank"}")
+
+        # does it contradict with something we can deduce based on shell count
+        except KeyError:
+            remaining_matching_shells = self.remaining_live_shells() if is_live else self.remaining_blank_shells()
+            if remaining_matching_shells < 1:
+                raise GameError(f"no {"live" if is_live else "blank"} shells left")
+
+
 
 
 @dataclass
@@ -61,6 +78,10 @@ class GameState:
     max_items: int = 8
 
     def shoot(self, target_name, is_live):
+
+        # check if this is possible given what we know
+        self.phase.round.assert_future_shell(0, is_live)
+
         non_target_name = "dealer" if target_name == "player" else "player"
         if is_live:
 
@@ -111,6 +132,7 @@ class GameState:
                 self.phase.round.is_players_turn = not self.phase.round.is_players_turn
 
     def eject_shell(self, is_live):
+        self.phase.round.assert_future_shell(0, is_live)
         self.phase.round.past_shells.append(is_live)
 
         # if no shells left, end round
