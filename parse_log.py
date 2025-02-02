@@ -314,14 +314,15 @@ def parse_game_line(old_state: GameState, words) -> GameState:
                     # TODO: something epistemic
                     pass
 
-                case [player_name, "uses", "phone", ",", "hears", shell_cardinal, shell_type]:
+                case [player_name, "uses", "phone", ",", "hears", _shell_cardinal, _shell_type]:
+                    is_live = _shell_type == "live"
                     try:
-                        shells_from_now = cardinal_to_ordinal[shell_cardinal]
+                        shells_from_now = cardinal_to_ordinal[_shell_cardinal]
                     except KeyError:
                         raise LogParseError("unknown cardinal (use 'second', 'third', etc.)")
                     if player_name != "player":
                         raise LogParseError("too much information: we shouldn't know what they see")
-                    new_state.phase.round.learn_future_shell(shells_from_now, shell_type)
+                    new_state.phase.round.learn_future_shell(shells_from_now, is_live)
 
                 case [player_name, "uses", "knife"]:
                     new_state.phase.round.gun_is_sawed = True
