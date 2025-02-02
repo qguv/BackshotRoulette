@@ -138,7 +138,7 @@ def parse_game_setup_line(old_state: GameState, words) -> GameState:
         case ["player", "uses", "pills"]:
             new_state.is_double_or_nothing_mode = True
 
-        case ["phase", phase_name, ",", _max_charges, "charges", *more]:
+        case ["phase", phase_name, ",", _max_charges, "charges", *more] | ["phase", phase_name, ",", _max_charges, "charge", *more]:
             # phase in log: one-indexed tally numerals
             # phase_num here: zero-indexed int
             expected_phase_name = "I" * (new_state.num_completed_phases + 1)
