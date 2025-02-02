@@ -333,13 +333,13 @@ def parse_game_line(old_state: GameState, words) -> GameState:
 
                 case [player_name, "uses", "glass"]:
                     if player_name == "player":
-                        raise GameError("missing information: what did the player see?")
+                        raise LogParseError("missing information: what did the player see?")
                     # TODO: something epistemic
                     pass
 
                 case [player_name, "uses", "glass", ",", "sees", _shell_type]:
                     if player_name != "player":
-                        raise GameError("too much information: we shouldn't know what they see")
+                        raise LogParseError("too much information: we shouldn't know what they see")
                     is_live = _shell_type == "live"
                     new_state.phase.round.learn_future_shell(0, is_live)
 
