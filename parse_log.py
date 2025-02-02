@@ -204,6 +204,10 @@ def parse_round_setup_line(old_state: GameState, words) -> GameState:
         case ["dealer", "loads", _total_live_shells, "live", ",", _total_blank_shells, "blank"]:
             total_live_shells = int(_total_live_shells)
             total_blank_shells = int(_total_blank_shells)
+            if total_live_shells + total_blank_shells > 8:
+                raise GameError("too many shells in the chamber! max 8 per round")
+            if 0 in (total_live_shells, total_blank_shells):
+                raise GameError("there must be at least one live and one blank shell per round")
             new_state.phase.round = RoundState(
                 total_live_shells=total_live_shells,
                 total_blank_shells=total_blank_shells,
