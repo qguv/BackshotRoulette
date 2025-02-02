@@ -1,0 +1,37 @@
+phase I, 2 charges
+
+round I.1
+dealer gets phone
+dealer loads 3 live, 3 blank
+player shoots dealer, live
+!check dealer charges = 1
+!check shells = 2 live, 3 blank
+
+# dealer knows there's a 2/5 (40%) chance for the next shell to be live, so they would want to shoot the player
+# shell possibilities: llbbb llbbb llbbb llbbb llbbb
+
+dealer uses phone
+
+# suppose they learn that the third shell is live, then there's a 1/4 (25%) chance for the next shell to be live
+# suppose they learn that the third shell is blank, then there's a 1/2 (50%) chance for the next shell to be live
+# so if the dealer happens to choose to shoot themself on the 50% chance that they get another turn, this would be evidence that they heard that the third shell is blank
+# (of course, if the dealer is aware of this strategy, since the odds are even, they'll choose the option that's the same as before so that they give no information)
+
+dealer shoots self, blank
+
+!check shells = 2 live, 2 blank
+# without DEL, the player would think that each of the four shells has a 50% probability of being live
+# shell possibilities: llbb llbb llbb llbb
+# but with DEL, the player thinks the next is 67% live, then 100% blank, then 67% live, then 67% live
+# shell possibilities: llb b llb llb
+
+dealer shoots player, live
+!check player charges = 1
+
+!check shells = 1 live, 2 blank
+# without DEL, the player would think that each of the three shells has a 33% chance of being live
+# but with DEL, the player thinks the next is 100% blank, then 50% live, then 50% live
+# shell possibilities: b lb lb
+# the problem is that, whether reasoning with DEL or without, the best next move is the same: the player should shoot themself. and after this, the player will have the same information with or without DEL
+
+player shoots self, blank
