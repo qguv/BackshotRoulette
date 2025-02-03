@@ -7,7 +7,7 @@ from sys import exit, stderr
 
 from exceptions import GameError, TurnError
 from game_state import GameState, PhaseState, Player, RoundState
-from roulette import Items
+from items import Items
 
 cardinal_to_ordinal = {
     "second": 1,
