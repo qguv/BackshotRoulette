@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Set
 
@@ -50,6 +51,22 @@ class RoundState:
             if remaining_matching_shells < 1:
                 raise GameError(f"actually, there are no {"live" if is_live else "blank"} shells left")
 
+    def chance_shell_is_live(self):
+
+        # are there enough shells?
+        i = len(self.past_shells)
+        if i >= self.total_shells():
+            raise GameError("actually, there aren't enough shells to learn that!")
+
+        # have we already learned it?
+        try:
+            return 1.0 if self.known_shells[i] else 0.0
+
+        # does it contradict with something we can deduce based on shell count
+        except KeyError:
+            return self.remaining_live_shells() / self.total_shells()
+
+
     def _eject_shell(self, is_live):
         self.assert_future_shell(0, is_live)
         self.past_shells.append(is_live)
@@ -75,6 +92,55 @@ class PhaseState:
         if len(self.round.past_shells) == self.round.total_shells():
             self.round = None
             self.num_completed_rounds += 1
+
+    def win_probability(self, player_name, depth=1):
+        if self.round is None:
+            print(" " * depth, "no winner") # DEBUG
+            return 0.0
+        opponent_name = "dealer" if player_name == "player" else "player"
+        if self.players[player_name].charges <= 0:
+            print(" " * depth, opponent_name, "wins") # DEBUG
+            return 0.0
+        if self.players[opponent_name].charges <= 0:
+            print (" " * depth, player_name, "wins") # DEBUG
+            return 1.0
+        live_chance = self.round.chance_shell_is_live()
+        blank_chance = 1.0 - live_chance
+
+        try:
+            shoot_dealer_live_win_chance = 0.0
+            if live_chance > 0.0:
+                shoot_dealer_live = deepcopy(self)
+                shoot_dealer_live._shoot("dealer", True)
+                shoot_dealer_live_win_chance = shoot_dealer_live.win_probability(player_name, depth=depth+1) * live_chance
+
+            shoot_dealer_blank_win_chance = 0.0
+            if blank_chance > 0.0:
+                shoot_dealer_blank = deepcopy(self)
+                shoot_dealer_blank._shoot("dealer", False)
+                shoot_dealer_blank_win_chance = shoot_dealer_blank.win_probability(player_name, depth=depth+1) * blank_chance
+
+            shoot_player_live_win_chance = 0.0
+            if live_chance > 0.0:
+                shoot_player_live = deepcopy(self)
+                shoot_player_live._shoot("player", True)
+                shoot_player_live_win_chance = shoot_player_live.win_probability(player_name, depth=depth+1) * live_chance
+
+            shoot_player_blank_win_chance = 0.0
+            if blank_chance > 0.0:
+                shoot_player_blank = deepcopy(self)
+                shoot_player_blank._shoot("player", False)
+                shoot_player_blank_win_chance = shoot_player_blank.win_probability(player_name, depth=depth+1) * blank_chance
+        except GameError:
+            return 0.0
+
+        shoot_dealer_win_chance = shoot_dealer_live_win_chance + shoot_dealer_blank_win_chance
+        shoot_player_win_chance = shoot_player_live_win_chance + shoot_player_blank_win_chance
+        if shoot_player_win_chance > shoot_dealer_win_chance:
+            print(" " * depth, "player" if self.round.is_players_turn else "dealer", "shoots player")
+        else:
+            print(" " * depth, "player" if self.round.is_players_turn else "dealer", "shoots dealer")
+        return max(shoot_dealer_win_chance, shoot_player_win_chance)
 
     def _shoot(self, target_name, is_live):
 
@@ -108,7 +174,6 @@ class PhaseState:
                 self.round.handcuffed_player_names.remove(next_player)
             except KeyError:
                 self.round.is_players_turn = not self.round.is_players_turn
-
 
 @dataclass
 class GameState:

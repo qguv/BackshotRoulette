@@ -220,6 +220,21 @@ def parse_round_setup_line(old_state: GameState, words) -> GameState:
 def check_query_line(state: GameState, words) -> None:
     match words:
 
+        case ["!check", player_name, "odds"]:
+            print(player_name, "odds:", state.phase.win_probability(player_name))
+
+        case ["!check", expected_winner_name, "charges", "=", _expected_value]:
+            expected_value = int(_expected_value)
+            if state.phase is None:
+                if expected_value != 0:
+                    raise CheckFailed(f"actually, {expected_winner_name} has 0 charges because no phase is in progress (yet/anymore)")
+                return
+            if expected_winner_name not in state.phase.players:
+                raise InvalidLine(f"no such player {expected_winner_name}")
+            player_charges = state.phase.players[expected_winner_name].charges
+            if player_charges != int(expected_value):
+                raise CheckFailed(f"actually, {expected_winner_name} has {player_charges} charges")
+
         case ["!check", expected_winner_name, "charges", "=", _expected_value]:
             expected_value = int(_expected_value)
             if state.phase is None:
