@@ -50,6 +50,10 @@ class RoundState:
             if remaining_matching_shells < 1:
                 raise GameError(f"actually, there are no {"live" if is_live else "blank"} shells left")
 
+    def _eject_shell(self, is_live):
+        self.assert_future_shell(0, is_live)
+        self.past_shells.append(is_live)
+
 @dataclass
 class Player:
     charges: int
@@ -64,6 +68,48 @@ class PhaseState:
     round: Optional[RoundState] = None
     num_completed_rounds: int = 0
 
+    def eject_shell(self, is_live):
+        self.round._eject_shell(is_live)
+
+        # if no shells left, end round
+        if len(self.round.past_shells) == self.round.total_shells():
+            self.round = None
+            self.num_completed_rounds += 1
+
+    def _shoot(self, target_name, is_live):
+
+        # check if this is possible given what we know
+        self.round.assert_future_shell(0, is_live)
+
+        if is_live:
+
+            if self.players[target_name].is_critical:
+                self.players[target_name].charges = 0
+
+            else:
+                # handle sawed gun
+                damage = 2 if self.round.gun_is_sawed else 1
+                self.round.gun_is_sawed = False
+
+                self.players[target_name].charges -= damage
+
+                if self.players[target_name].charges <= self.critical_charges:
+                    self.players[target_name].is_critical = True
+
+        self.eject_shell(is_live)
+        if not self.round:
+            return
+
+        # advance turn
+        shooter_name = "player" if self.round.is_players_turn else "dealer"
+        if shooter_name != target_name or is_live:
+            next_player = "dealer" if self.round.is_players_turn else "player"
+            try:
+                self.round.handcuffed_player_names.remove(next_player)
+            except KeyError:
+                self.round.is_players_turn = not self.round.is_players_turn
+
+
 @dataclass
 class GameState:
     player_names: List[str]
@@ -76,64 +122,22 @@ class GameState:
     max_items: int = 8
 
     def shoot(self, target_name, is_live):
-
-        # check if this is possible given what we know
-        self.phase.round.assert_future_shell(0, is_live)
-
+        self.phase._shoot(target_name, is_live)
         non_target_name = "dealer" if target_name == "player" else "player"
-        if is_live:
+        if self.phase.players[target_name].charges <= 0:
 
-            if self.phase.players[target_name].is_critical:
-                self.phase.players[target_name].charges = 0
+            # the non-target wins the phase
+            self.winner_names_by_phase.append(non_target_name)
+            self.num_completed_phases += 1
+            self.phase = None
 
-            else:
-                # handle sawed gun
-                damage = 2 if self.phase.round.gun_is_sawed else 1
-                self.phase.round.gun_is_sawed = False
+            # the non-target wins the game if:
+            if (
+                # the human player dies in double-or-nothing mode
+                (target_name == "player" and self.is_double_or_nothing_mode)
 
-                self.phase.players[target_name].charges -= damage
-
-                if self.phase.players[target_name].charges <= self.phase.critical_charges:
-                    self.phase.players[target_name].is_critical = True
-
-            # if the target died
-            if self.phase.players[target_name].charges <= 0:
-
-                # the non-target wins the phase
-                self.winner_names_by_phase.append(non_target_name)
-                self.num_completed_phases += 1
-                self.phase = None
-
-                # the non-target wins the game if:
-                if (
-                    # the human player dies in double-or-nothing mode
-                    (target_name == "player" and self.is_double_or_nothing_mode)
-
-                    # or the target dies in the last phase
-                    or (self.num_completed_phases == self.total_phases)
-                ):
-                    self.winner = non_target_name
-
-                return
-
-        self.eject_shell(is_live)
-        if not self.phase.round:
+                # or the target dies in the last phase
+                or (self.num_completed_phases == self.total_phases)
+            ):
+                self.winner = non_target_name
             return
-
-        # advance turn
-        shooter_name = "player" if self.phase.round.is_players_turn else "dealer"
-        if shooter_name != target_name or is_live:
-            next_player = "dealer" if self.phase.round.is_players_turn else "player"
-            try:
-                self.phase.round.handcuffed_player_names.remove(next_player)
-            except KeyError:
-                self.phase.round.is_players_turn = not self.phase.round.is_players_turn
-
-    def eject_shell(self, is_live):
-        self.phase.round.assert_future_shell(0, is_live)
-        self.phase.round.past_shells.append(is_live)
-
-        # if no shells left, end round
-        if len(self.phase.round.past_shells) == self.phase.round.total_shells():
-            self.phase.round = None
-            self.phase.num_completed_rounds += 1

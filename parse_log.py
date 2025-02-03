@@ -345,7 +345,7 @@ def parse_game_line(old_state: GameState, words) -> GameState:
 
                 case [player_name, "uses", "beer", ",", "ejects", _shell_type]:
                     is_live = _shell_type == "live"
-                    new_state.eject_shell(is_live)
+                    new_state.phase.eject_shell(is_live)
 
                 case _:
                     raise NoMatch("expecting game line")
