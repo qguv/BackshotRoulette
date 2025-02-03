@@ -1,7 +1,7 @@
 phase I, 2 charges
 
 round I.1
-dealer gets phone
+dealer gets phone, cuffs
 dealer loads 2 live, 4 blank
 player shoots dealer, blank
 !check shells = 2 live, 3 blank
@@ -10,6 +10,7 @@ player shoots dealer, blank
 # shell possibilities: llbbb llbbb llbbb llbbb llbbb
 
 dealer uses phone
+dealer uses cuffs
 
 # suppose they learn that the third shell is live:
     # shell possibilities: lbbb lbbb l lbbb lbbb
