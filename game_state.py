@@ -107,6 +107,7 @@ class PhaseState:
         live_chance = self.round.chance_shell_is_live()
         blank_chance = 1.0 - live_chance
 
+        # FIXME not correctly simulating opponent turns by reversing polarity!!!
         try:
             shoot_dealer_live_win_chance = 0.0
             if live_chance > 0.0:
