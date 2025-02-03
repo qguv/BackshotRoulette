@@ -1,0 +1,172 @@
+phase I, 2 charges
+
+round I.1
+dealer gets phone
+player gets phone
+dealer loads 2 live, 4 blank
+player uses phone, hears fourth blank
+player shoots dealer, blank
+!check shells = 2 live, 3 blank
+
+# dealer knows there's a 2/5 (40%) chance for the next shell to be live, so they would want to shoot themself for a chance at another turn
+# shell possibilities: llbbb llbbb llbbb llbbb llbbb
+
+dealer uses phone
+
+# suppose they learn that the third shell is live:
+    # shell possibilities: lbbb lbbb l lbbb lbbb
+    # then there's a 1/4 (25%) chance for the next shell to be live
+# suppose they learn that the third shell is blank
+    # shell possibilities: llbb llbb b llbb llbb
+    # then there's a 1/2 (50%) chance for the next shell to be live
+# so if the dealer happens to choose to shoot the player on the 50% chance that they get another turn, this would be evidence that they heard that the third shell is blank
+# (of course, if the dealer is aware of this strategy, since the odds are even, they'll choose the option that's the same as before so that they give no information)
+
+dealer shoots player, blank
+
+!check shells = 2 live, 2 blank
+!check player odds
+!check dealer odds
+# without DEL, the player would think that each of the four shells has a 50% probability of being live
+    # shell possibilities: llbb llbb llbb llbb
+    # if player shoots dealer:
+        # 33% dealer -2, 33% dealer -1, 17% all -1, 17% player -1 because:
+            # if live (50%):
+                # shell possibilities: lbb lbb lbb
+                # 66% dealer -2, 33% all -1 because:
+                    # dealer takes damage
+                    # 66% dealer -1, 33% player -1 because:
+                        # if dealer shoots self (optimal):
+                            # 66% dealer -1, 33% player -1 because:
+                                # if live (33%), dealer -1, rest are blank, next round
+                                # if blank (67%):
+                                    # shell possibilities: 1b 1b
+                                    # 50% player -1, 50% dealer -1 because:
+                                        # if dealer shoots player:
+                                            # 50% player -1, 50% dealer -1 because:
+                                            # if live (50%), player -1, rest are blank, next round
+                                            # if blank (50%), next is live, player will shoot dealer, dealer -1, next round
+                                        # if dealer shoots self:
+                                            # 50% player -1, 50% dealer -1 because:
+                                                # if live (50%), dealer -1, rest are blank, next round
+                                                # if blank (50%), dealer will shoot player, player -1, next round
+                        # if dealer shoots player (suboptimal):
+                            # 66% player -1, 33% dealer -1 because:
+                                # if live (33%), player -1, rest are blank, next round
+                                # if blank (67%):
+                                    # shell possibilities: lb lb
+                                    # 50% dealer -1, 50% player -1 because:
+                                        # if player shoots dealer:
+                                            # 50% dealer -1, 50% player -1 because:
+                                                # if live (50%), dealer -1, rest are blank, next round
+                                                # if blank (50%), dealer will shoot player, player -1, next round
+                                        # if player shoots self:
+                                            # 50% dealer -1, 50% player -1 because:
+                                                # if live (50%), player -1, rest are blank, next round
+                                                # if blank (50%), next is live, player will shoot dealer, dealer -1, next round
+            # if blank (50%):
+                # 66% dealer -1, 33% player -1 because:
+                    # same as live case above, but dealer doesn't lose 1 health first
+    # if player shoots self:
+        # 50% player -1, 33% dealer -1, 17% all -1 because:
+            # if live (50%):
+                # shell possibilities: lbb lbb lbb
+                # 67% player -1, 33% dealer -1 because:
+                    # if dealer shoots player:
+                        # 67% player -1, 33% dealer -1 because:
+                            # if live (33%), player -1, rest is blank, next round
+                            # if blank (67%):
+                                # shell possibilities: lb lb
+                                # 50% dealer -1, 50% player -1 because:
+                                    # if player shoots dealer:
+                                        # 50% dealer -1, 50% player -1 because:
+                                            # if live (50%), dealer -1, rest is blank, next round
+                                            # if blank (50%), dealer will shoot player, player -1, next round
+                                    # if player shoots self:
+                                        # 50% dealer -1, 50% player -1 because:
+                                            # if live (50%), player -1, rest is blank, next round
+                                            # if blank (50%), player shoots dealer, dealer -1, next round
+                    # if dealer shoots self:
+                        # 67% dealer -1, 33% player -1 because:
+                            # if live (33%): dealer -1, rest are blanks, next round
+                            # if blank (67%):
+                                # shell possibilities: lb lb
+                                # 50% dealer -1, 50% player -1 because:
+                                    # if dealer shoots player:
+                                        # 50% dealer -1, 50% player -1 because:
+                                            # if live (50%): player -1, rest are blanks, next round
+                                            # if blank (50%): next is live, player shoots dealer, dealer -1, next round
+                                    # if dealer shoots self:
+                                        # 50% dealer -1, 50% player -1 because:
+                                            # if live (50%): dealer -1, rest are blanks, next round
+                                            # if blank (50%): next is live, dealer shoots player, player -1, next round
+            # if blank (50%):
+                # shell possibilities: llb llb llb
+                # 33% dealer -1, 33% player -1, 33% both -1 because:
+                    # if player shoots dealer:
+                        # 33% dealer -1, 33% player -1, 33% both -1 because:
+                            # if live (67%):
+                                # shell possibilities: lb lb
+                                # 50% dealer -1, 50% player -1 because:
+                                    # if dealer shoots player:
+                                        # 50% dealer -1, 50% player -1 because:
+                                            # if live (50%), player -1, rest are blanks, next round
+                                            # if blank (50%), next is live, player will shoot dealer, dealer -1, next round
+                                    # if dealer shoots self:
+                                        # 50% dealer -1, 50% player -1 because:
+                                            # if live (50%): dealer -1, rest are blank, next round
+                                            # if blank (50%): next is live, dealer shoots player, player -1, next round
+                            # if blank (33%), next two are live, -1 all, next round
+                    # if player shoots self:
+                        # 33% dealer -1, 33% player -1, 33% both -1 because:
+                            # if live (67%):
+                                # shell possibilities: lb lb
+                                # 50% dealer -1, 50% player -1 because:
+                                    # if dealer shoots player:
+                                        # 50% dealer -1, 50% player -1 because:
+                                            # if live (50%), -1 player, rest are blanks, next round
+                                            # if blank (50%), next is live, player shoots dealer, -1 dealer, next round
+                                    # if dealer shoots self:
+                                        # 50% dealer -1, 50% player -1 because:
+                                            # if live (50%), dealer -1, rest are blanks, next round
+                                            # if blank (50%), dealer will shoot player, -1 player, next round
+                            # if blank (33%), rest are live, -1 all, next round
+# but with DEL, the player thinks the next is 67% live, then 100% blank, then 67% live, then 67% live
+    # shell possibilities: llb b llb llb
+    # if player shoots dealer:
+        # ??? because:
+            # if live (67%):
+                # shell possibilities: b lb lb
+                # 50% dealer -1, 50% player -1 because:
+                    # if dealer shoots player:
+                        # 50% dealer -1, 50% player -1 because:
+                            # if live (0%): doesn't matter
+                            # if blank (100%):
+                                # 50% dealer -1, 50% player -1 because:
+                                    # if player shoots dealer:
+                                        # 50% dealer -1, 50% player -1 because:
+                                            # if live (50%), dealer -1, rest are blanks, next round
+                                            # if blank (50%), next is live, dealer will shoot, player -1, next round
+                                    # if player shoots self:
+                                        # 50% dealer -1, 50% player -1 because:
+                                            # if live (50%): player -1, rest are blanks, next round
+                                            # if blank (50%), next is live, player will shoot dealer, dealer -1, next round
+                    # if dealer shoots self:
+                        # 50% dealer -1, 50% player -1 because:
+                            # if live (0%): doesn't matter
+                            # if blank (100%):
+                                # shell possibilities: 1b 1b
+                                # 50% dealer -1, 50% player -1 because:
+                                    # if dealer shoots player:
+                                        # 50% dealer -1, 50% player -1 because:
+                                            # if live (50%), player -1, rest are blanks, next round
+                                            # if blank (50%), next is live, player will shoot, dealer -1, next round
+                                    # if dealer shoots self:
+                                        # 50% dealer -1, 50% player -1 because
+                                            # if live (50%), dealer -1, rest are blanks, next round
+                                            # if blank (50%), next is live, dealer will shoot player, player -1, next round
+            # if blank (33%):
+                # shell possibilities: b l l
+                # ??? because:
+                    # if dealer shoots player:
+                        # 

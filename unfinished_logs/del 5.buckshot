@@ -1,0 +1,19 @@
+phase I, 2 charges
+
+round I.1
+dealer gets phone
+dealer loads 3 live, 3 blank
+player shoots dealer, live
+!check dealer charges = 1
+!check shells = 2 live, 3 blank
+dealer uses phone
+# learns... second is blank
+#3/5 vs 2/5
+#2/4 vs 2/4
+
+# dealer uses phone
+# you don't have a phone
+# you see the dealer do something sub-optimal (assuming no info)
+# you use this to deduce the information the dealer got from the phone
+# you use THIS to improve your chances of winning
+# -> (namely, by making a move different than the previous optimal move)

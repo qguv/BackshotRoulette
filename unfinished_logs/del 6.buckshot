@@ -1,0 +1,30 @@
+phase I, 2 charges
+
+round I.1
+dealer gets phone
+dealer loads 3 live, 3 blank
+player shoots dealer, live
+!check dealer charges = 1
+!check shells = 2 live, 3 blank
+dealer uses phone
+# learns... third is... maybe live
+dealer uses beer
+# ejects <something>
+dealer shoots self, live
+# it's actually more likely to be live
+# so dealer must THINK that it's blank
+# player can now maybe use info
+# player deduces that he only shoots himself if he knows the CURRENT shell is live
+# ...
+player shoots dealer, live
+# profit
+player wins phase I
+
+
+# you don't have a phone, the dealer does
+# dealer uses phone, learns something about the THIRD round (or later) but not the last, that's forbidden
+# dealer uses beer? which in combination takes the >50% chance to a <50% chance without going "through" 50%
+# this would be sub-optimal (assuming no info) so the dealer must have learned... something specific
+# you use this to deduce the information the dealer got from the phone
+# you use THIS to improve your chances of winning
+# -> (namely, by making a move different than the previous optimal move)

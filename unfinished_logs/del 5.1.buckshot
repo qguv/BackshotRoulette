@@ -1,0 +1,27 @@
+phase I, 3 charges
+
+round I.1
+dealer gets phone
+dealer loads 3 live, 3 blank
+player shoots dealer, live
+!check dealer charges = 2
+!check shells = 2 live, 3 blank
+
+# dealer knows there's a 2/5 (40%) chance for the next shell to be live, so they would want to shoot the player
+
+dealer uses phone
+
+# suppose they learn that the third shell is live, then there's a 1/4 (25%) chance for the next shell to be live
+# suppose they learn that the third shell is blank, then there's a 1/2 (50%) chance for the next shell to be live
+# so if the dealer happens to choose to shoot themself on the 50% chance that they get another turn, this would be evidence that they heard that the third shell is blank
+# (of course, if the dealer is aware of this strategy, since the odds are even, they'll choose the option that's the same as before so that they give no information)
+
+dealer shoots self, live
+
+!check shells = 1 live, 3 blank
+
+# without DEL, the player would think that all four shells have 25% probability of being live
+# but with DEL, the player thinks the next is 33% live, then 100% blank, then 33% live, then 33% live
+# lbb b lbb lbb
+
+# TODO

@@ -1,0 +1,14 @@
+!check shells = 7 blank, 1 live
+!check dealer charges = 1
+# eh I dunno
+# sorry
+# this is stupid
+# you should always use cigs in this game
+dealer uses phone
+dealer doesn't use cigs
+
+# case for saving cigarettes:
+# you have or may get EXPIRED_MEDICINE
+# medicine could heal for 2
+# if you're healed to (max - 1), medicine would heal only for one, wasting it
+# so save your cigs for later
